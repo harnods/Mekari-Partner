@@ -1,0 +1,172 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { MpToastManager } from '@mekari/pixel3'
+import { useProductMenu } from '~/composables/useProductMenu'
+import { useReportFullscreen } from '~/composables/useReportFullscreen'
+import { isHrPath } from '~/utils/hrRoutes'
+// DevChangesOverlay disabled — coachmarks were distracting during dev.
+// import DevChangesOverlay from '~/components/patterns/DevChangesOverlay.vue'
+
+// The module nav follows the active product: Talenta (HR) on /hr* + the HR module
+// pages (Employee directory, etc.), Qontak (CRM) on /crm*, ERP otherwise.
+const route = useRoute()
+const isHr = computed(() => isHrPath(route.path))
+const isCrm = computed(() => route.path.startsWith('/crm'))
+// No CRM access → the /crm route shows the paywall full-bleed, with NO level-1
+// sidebar at all (not even the ERP one). See useCrmAccess + CrmPaywallPage.
+const { hasCrmAccess } = useCrmAccess()
+const crmPaywall = computed(() => isCrm.value && !hasCrmAccess.value)
+// The product-switcher rail is opt-in (top-right user menu → "Show ERP Menu").
+const { showProductMenu } = useProductMenu()
+// A report page can request a chrome-less full-screen view (header + nav hidden).
+const { isReportFullscreen } = useReportFullscreen()
+</script>
+
+<template>
+  <div class="app-shell">
+    <ErpHeader v-if="!isReportFullscreen" />
+    <div class="main-container" :class="{ 'main-container--rail': showProductMenu && !isReportFullscreen, 'main-container--fullscreen': isReportFullscreen }">
+      <template v-if="!isReportFullscreen">
+        <ErpNavbarGroup v-if="showProductMenu" />
+        <HrSidebar v-if="isHr" />
+        <CrmSidebar v-else-if="isCrm && !crmPaywall" />
+        <ErpSidebar v-else-if="!crmPaywall" />
+      </template>
+      <div class="content-area">
+        <slot />
+      </div>
+    </div>
+    <MpToastManager />
+    <!-- <DevChangesOverlay /> -->
+  </div>
+</template>
+
+<style>
+/*
+ * ── Pixel Token v2.4 — Enterprise theme ─────────────────────────────────────
+ *
+ * Pixel's PostCSS plugin generates utility classes but does NOT inject semantic
+ * CSS custom property definitions globally. We define them here so all custom
+ * components (ErpHeader, ErpSidebar, ErpTablePage, etc.) can reference them.
+ *
+ * Values are the ENTERPRISE theme values from Token v2.4.
+ * Source: https://docs.mekari.design/docs/design-token-v2-4.html
+ */
+
+:root {
+  /* Background */
+  --mp-background-surface-bold: #142d26;
+  --mp-background-surface: #f8f9f9;
+  --mp-background-stage: #ffffff;
+  --mp-background-neutral: #ffffff;
+  --mp-background-neutral-subtle: #f8f9f9;
+  --mp-background-neutral-hovered: #f8f9f9;
+  --mp-background-neutral-pressed: #ebf0f1;
+  --mp-background-neutral-subtle-hovered: #ebf0f1;
+  --mp-background-nav-stack-hovered: #d6f4e9;
+
+  /* Border */
+  --mp-border-default: #e3e7e9;
+  --mp-border-bold: #8c9596;
+
+  /* Text */
+  --mp-text-default: #080d0e;
+  --mp-text-inverse: #ffffff;
+  --mp-text-secondary: #3a4749;
+  --mp-text-subtle: #6e7a7c;
+  --mp-text-placeholder: #6e7a7c;
+  --mp-text-selected: #0f6d4d;
+  --mp-text-link: #165082;
+  --mp-text-disabled: #8c9596;
+  --mp-text-danger: #a8352d;
+
+  /* Background — inverse */
+  --mp-background-inverse: #142d26;
+
+  /* Typography */
+  --mp-fonts-body: "Inter", -apple-system, BlinkMacSystemFont, Helvetica, Arial,
+    sans-serif;
+
+  /* Radius */
+  --mp-radii-md: 0.375rem;
+
+  /* Shadow (Enterprise uses #1D1F2429 as shadow color) */
+  --mp-shadows-sm: 0px 10px 15px -3px #1d1f2429, 0px 4px 6px -2px #1d1f2429;
+  --mp-shadows-md: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --mp-shadows-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* ── Airene (Mekari AI) brand tokens — extends 2.4 Enterprise palette ── */
+  --mp-airene-default: #651fff;
+  --mp-airene-bold: #5a41d6;
+  --mp-airene-hovered: #7c3aed;
+  --mp-airene-pressed: #6d28d9;
+  --mp-airene-subtle: #ede9fe;
+  --mp-airene-banner-bg: #f6f3ff;
+  --mp-airene-banner-text: #5221a5;
+  --mp-airene-badge-bg: #f3f1fc;
+  --mp-airene-badge-border: #8270db;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--mp-fonts-body);
+  -webkit-font-smoothing: antialiased;
+  background: var(--mp-background-surface-bold);
+  color: var(--mp-text-default);
+}
+
+#__nuxt {
+  height: 100%;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: var(--mp-background-neutral-subtle, #f8f9f9);
+  border-left: 2px solid var(--mp-background-surface-bold);
+  border-right: 2px solid var(--mp-background-surface-bold);
+  border-radius: 12px 12px 0 0;
+}
+
+/* With the product rail shown, a dark-green backing sits behind the module-nav so
+   its rounded top-left corner reads continuous with the dark rail beside it. Only
+   ever visible through the rounded-corner cutouts (children tile the rest). */
+.main-container--rail {
+  background: var(--mp-background-surface-bold);
+}
+/* Report full-screen — frame the white stage with an even 2px base-colour
+   border on all four sides, keeping the 12px rounded corners. */
+.main-container--fullscreen {
+  border: 2px solid var(--mp-background-surface-bold);
+  border-radius: 12px;
+}
+.main-container--rail .sidebar {
+  border-top-left-radius: 12px;
+}
+
+.content-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--mp-background-neutral-subtle, #f8f9f9);
+}
+</style>

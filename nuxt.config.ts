@@ -1,0 +1,126 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  srcDir: "app/",
+  ssr: false,
+  compatibilityDate: "2025-07-15",
+  devtools: { enabled: true },
+  // Mekari Partner dev port (ERP uses 4321/4322). Preview runs on 4324 — see the
+  // "preview" script in package.json.
+  devServer: { port: 4323 },
+
+  // Server-only secret for the Cowork (AI) feature. Value comes from
+  // NUXT_GEMINI_API_KEY in .env.local (gitignored) — never hardcoded/committed.
+  // It's exposed ONLY to server routes (server/api/*), not the client bundle.
+  runtimeConfig: {
+    geminiApiKey: "",
+    geminiModel: "gemini-flash-latest",
+    // Access gate (Google @mekari.com login). Server-only:
+    //   • sessionSecret     — HMAC key that signs the session cookie (NUXT_SESSION_SECRET).
+    //   • allowedEmailDomain — only this Google Workspace domain may sign in.
+    // The gate is disabled (app open) only if googleClientId + sessionSecret are unset.
+    sessionSecret: "",
+    allowedEmailDomain: "mekari.com",
+    public: {
+      // Google OAuth (client-side, Google Identity Services) for the real Cowork
+      // connections (Calendar / Gmail / Contacts). Public client ID — safe to
+      // expose; set NUXT_PUBLIC_GOOGLE_CLIENT_ID in .env. Empty = not configured.
+      googleClientId: "",
+    },
+  },
+
+  app: {
+    head: {
+      title: "Mekari ERP",
+      link: [{ rel: "icon", type: "image/svg+xml", href: "/mekari-brand.svg" }]
+    }
+  },
+
+  // Cache policy (fixes "blank page until reload" after a rebuild/redeploy).
+  // This is an SPA (ssr:false) with hashed, code-split page chunks. If the browser
+  // heuristically caches index.html (it sends no cache-control by default), a tab
+  // keeps the OLD shell whose chunk hashes 404 after the next deploy → the lazy
+  // page import fails and the app renders blank until a manual reload.
+  //   • HTML must always be revalidated  → no-cache (browser re-checks every load)
+  //   • /_nuxt/* is content-hashed        → immutable (new build = new URL, safe)
+  // Applied to both the node preview and Vercel (routeRules is portable).
+  routeRules: {
+    "/_nuxt/**": { headers: { "cache-control": "public, max-age=31536000, immutable" } },
+    "/**": { headers: { "cache-control": "no-cache" } },
+  },
+
+  components: [
+    { path: '~/components/patterns', pathPrefix: false },
+    { path: '~/components/pages', pathPrefix: false },
+    { path: '~/components' },
+  ],
+
+  build: {
+    transpile: ['@ds/proto-review'],
+  },
+
+  css: [
+    // pixel.css is the sole Panda root — PostCSS injects all generated CSS here,
+    // starting with the @layer order declaration. erp.css comes after so every
+    // override (unlayered and @layer pixel_reset) lands after the Panda rules.
+    "@/assets/css/pixel.css",
+    "@/assets/css/erp.css",
+    // Shared chrome for the full-bleed CRM list pages (title bar/filter/table/tags).
+    "@/assets/css/crm-page.css",
+    // Shared shell for the Credit memo flow detail + form pages.
+    "@/assets/css/credit-memo.css",
+  ],
+  postcss: {
+    plugins: {
+      "@mekari/pixel3-postcss": {}
+    }
+  },
+  vite: {
+    optimizeDeps: {
+      // Pre-bundle everything up front. If Vite discovers a dep at RUNTIME instead
+      // (e.g. @supabase/supabase-js pulled via proto-review, or the devtools client),
+      // it re-optimizes mid-session — which swaps Pixel3's module identity and makes
+      // its popover/tooltip directives read undefined state on unmount ("Cannot read
+      // properties of undefined (reading 'show')" → 500). Listing them here avoids that.
+      // jspdf / jspdf-autotable / bwip-js are heavy CJS libs pulled in lazily by the
+      // PDF-export and barcode features. If they're NOT listed here, Vite discovers
+      // them at runtime the first time such a feature loads, re-optimizes deps, and
+      // triggers a full page reload — which races Panda's non-atomic pixel.css regen
+      // and empties the stylesheet (the whole app renders unstyled). Pre-bundling them
+      // up front means Vite never re-optimizes mid-session, so that race can't happen.
+      include: [
+        '@mekari/pixel3', '@vue/devtools-core', '@vue/devtools-kit', '@supabase/supabase-js',
+        'jspdf', 'jspdf-autotable', 'bwip-js',
+      ],
+    },
+    css: {
+      devSourcemap: false,
+    },
+    plugins: [
+      (() => {
+        // Panda's regeneration of pixel.css isn't atomic — several source-file
+        // saves in quick succession (e.g. a script reverting+restoring a file,
+        // or a burst of edits) can fire this hook again before the previous
+        // regeneration pass finished writing, so a full-reload can fire against
+        // a half-written file and leave the browser looking broken until a full
+        // dev-server restart. Debounce: only reload once no further pixel.css
+        // write lands within the window, so we always reload against the
+        // settled, complete file instead of a mid-write snapshot.
+        let cssReloadTimer: ReturnType<typeof setTimeout> | undefined
+        return {
+          name: 'global-css-full-reload',
+          handleHotUpdate({ file, server }: { file: string; server: any }) {
+            // Global CSS changes → full reload to preserve @layer order
+            if (file.includes('/assets/css/')) {
+              if (cssReloadTimer) clearTimeout(cssReloadTimer)
+              cssReloadTimer = setTimeout(() => {
+                cssReloadTimer = undefined
+                server.ws.send({ type: 'full-reload' })
+              }, 300)
+              return []
+            }
+          },
+        }
+      })(),
+    ],
+  }
+});

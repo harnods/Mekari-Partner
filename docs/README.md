@@ -1,0 +1,78 @@
+# Mekari ERP — Documentation
+
+Start here. This is the home for ERP UI/UX documentation.
+
+> **Start here for any UI work:** invoke the **`pixel-erp-design`** skill (the
+> mandatory entry point — it routes you to the right rules per surface), and read
+> [`design/RULES.md`](design/RULES.md) — the canonical registry of accepted
+> decisions as stable `rule/<id>`s, plus the authority hierarchy.
+> [`design/reachable-states.md`](design/reachable-states.md) is the completeness
+> checklist. [`DESIGN.md`](../DESIGN.md) is the long-form rationale; the pages below
+> are component- and page-level specs.
+
+---
+
+## General ERP UI/UX
+
+| Topic | Doc | Covers |
+|---|---|---|
+| Design rules | [DESIGN.md](../DESIGN.md) | Theme (Enterprise), layout (stage, page title bar), Pixel component usage, table design spec, pre-coding checklist |
+| Design tokens | [design-tokens.md](../.agents/skills/pixel/references/design-tokens.md) | Token priority (v2.4 vs v2.1), color / spacing / typography choices |
+| Code structure | [code-structure.md](../.agents/skills/pixel/references/code-structure.md) | Vue SFC order, script-setup order, import grouping, component practices |
+
+## Page Format
+
+| Topic | Doc | Covers |
+|---|---|---|
+| Global header bar | [global-header-bar.md](patterns/global-header-bar.md) | The dark 56px app header (`ErpHeader`) — logo/switcher, center search, quick-action icon buttons (always white `icon.inverse`, translucent-white hover veil, no border), user menu |
+| Page title bar | [page-title-bar.md](patterns/page-title-bar.md) | The 72px title bar shared by every page — dimensions, index/detail/form variants, title-bar badge rule |
+| Index page format | [index-page-format.md](patterns/index-page-format.md) | Wireframe + spec for list/index pages (filter bar → table → pagination) |
+| Detail page format | [details-page-format.md](patterns/details-page-format.md) | Wireframe + spec for transaction detail pages (header summary 2–5 col → line items → totals → tabs → footer actions) |
+| Page recipes | [page-recipes.md](patterns/page-recipes.md) | Routing only — sends you to index-page-format.md / Form.md / details-page-format.md per page type; no scaffolds live here anymore |
+| Tabs | [tabs.md](patterns/tabs.md) | Status tabs (outside stage, via `pageTabs`) vs in-page detail tabs (`MpTabs`); correct active color |
+
+## PRD (product specs)
+
+Local mirrors of Confluence PRDs, for reference. Re-fetch from Confluence for the latest.
+
+| PRD | Doc | Covers |
+|---|---|---|
+| CRM — ERP Transaction Conversion | [prd/crm-erp-conversion-settings-prd.md](prd/crm-erp-conversion-settings-prd.md) · [gap analysis](prd/crm-erp-conversion-settings-gap.md) | Settings → ERP Integration Settings (per-module enable + SQ/SO target + field mapping + readiness) and runtime manual read-only conversion of a CRM record → one ERP transaction (exactly-once). The gap doc maps PRD areas to prototype surfaces + our build plan. **Our prototype is the PRD's cited design reference.** |
+| WMS — Inbound | [prd/wms-inbound-prd.md](prd/wms-inbound-prd.md) | Inbound backbone (PO/ASN intake → receiving + QC → put-away → close) |
+| WMS — Outbound | [prd/wms-outbound-prd.md](prd/wms-outbound-prd.md) | Outbound fulfilment lifecycle |
+| WMS — Reports & Analytics | [prd/wms-reports-analytics-prd.md](prd/wms-reports-analytics-prd.md) | WMS reporting/analytics |
+
+## Flows / Scenarios
+
+| Topic | Doc | Covers |
+|---|---|---|
+| Inbound (Barang masuk) | [inbound-complete-scenario.md](scenarios/inbound-complete-scenario.md) | End-to-end PO → Receiving Task → Put-away: statuses, transitions, SKU-coverage rules, PO-status derivation, seed-data states. **Draft spec — pending sign-off.** |
+
+## Testing
+
+| Topic | Doc | Covers |
+|---|---|---|
+| Test suite overview | [testing/README.md](testing/README.md) | How to run, conventions (node vs happy-dom, unique-id isolation), 133-file/673-test headline |
+| Data model & coherence | [testing/data-model.md](testing/data-model.md) | Mini-DB entities, ID schemes, status lifecycles, cross-module FK graph, coherence invariants + fixes |
+| Scenario catalog | [testing/scenarios.md](testing/scenarios.md) | Every covered scenario per module (happy/edge/regression) mapped to its spec file |
+| Integrity guards | [testing/integrity-guards.md](testing/integrity-guards.md) | Cross-module guards, what each prevents, reason codes, spec files |
+
+## ERP Components
+
+| Component | Doc | Covers |
+|---|---|---|
+| Table | [ErpTablePage.md](patterns/ErpTablePage.md) | Header/row/sticky columns, props, slots, emits, formatters, standard columns |
+| Pagination | [ErpPagination.md](patterns/ErpPagination.md) | Rows-per-page selector, page info, prev/next |
+| Filter Bar | [ErpFilterBar.md](patterns/ErpFilterBar.md) | Layout container for filter controls + standard search pattern |
+| Button | [Button.md](patterns/Button.md) | Secondary vs ghost usage, ERP button visuals, cancel/dismiss rules |
+| Status Badge | [ErpStatusBadge.md](patterns/ErpStatusBadge.md) | Status → badge type mapping |
+| Content List | [ContentList.md](patterns/ContentList.md) | Labelled key/value field (label over value); detail header + key/value displays |
+| Date format | [date-format.md](patterns/date-format.md) | Numeric `DD/MM/YYYY` table date standard; `formatDate` / `formatDateTime` helpers |
+| Currency format | [currency-format.md](patterns/currency-format.md) | `Rp4.000.000,00` (no space), 3 "Amount display" modes (with/without decimals, abbreviated `Rp2 jt`), settings-driven via `useCurrencySettings` + `formatIDR` / `formatMoney` |
+| Advanced date picker | [AdvancedDateRangePicker.md](patterns/AdvancedDateRangePicker.md) | Preset date-range field (Today / Last 7·14·30 days, range shown per preset; `direction="future"` for Next N days); calendar for granular/Custom |
+| Form | [Form.md](patterns/Form.md) | Field anatomy, layout rules (558px / 6-col), field type → Pixel component |
+| Form Table | [FormTable.md](patterns/FormTable.md) | Editable table cells in forms/drawers: input cells, select/search cells, focus/error states |
+| Toast | [Toast.md](patterns/Toast.md) | Success/error feedback, Pixel icon rule, UXW copy rule, implementation checklist |
+| Modal | [Modal.md](patterns/Modal.md) | Centered dialog for focused/interrupting tasks |
+| Drawer | [Drawer.md](patterns/Drawer.md) | Side panel for contextual detail/edit without leaving the page |
+| Dev Changes overlay | [dev-changes-overlay.md](patterns/dev-changes-overlay.md) | Engineer-facing "what changed & where" layer — tag a changed element + add a registry entry per push; per-user resolve/dismiss, on by default |

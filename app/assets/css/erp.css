@@ -1,0 +1,787 @@
+/* ── ERP shared button ──────────────────────────────────────────────────────── */
+
+.btn-enterprise {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mp-spacing-2);
+  padding: var(--mp-spacing-2) var(--mp-spacing-4);
+  border-radius: var(--mp-radii-full, 999px);
+  font-size: var(--mp-font-sizes-md);
+  font-weight: var(--mp-font-weights-semi-bold);
+  line-height: var(--mp-line-heights-md);
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+/* Secondary (ERP) — #8c9596 border, black text on a neutral fill. */
+.btn-enterprise--secondary {
+  background: var(--mp-background-neutral);
+  border-color: var(--mp-border-bold);
+  color: var(--mp-text-default);
+  font-weight: var(--mp-font-weights-semi-bold);   /* semibold like primary; only ghost is regular */
+}
+.btn-enterprise--secondary:hover { background: var(--mp-background-neutral-hovered); }
+
+/* Ghost — used for Cancel / dismiss actions across the app (no fill, no border). */
+.btn-enterprise--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--mp-text-secondary);
+  font-weight: var(--mp-font-weights-regular);
+}
+.btn-enterprise--ghost:hover { background: var(--mp-background-neutral-hovered); }
+
+.btn-enterprise--primary {
+  background: var(--mp-colors-emerald-700, #029861);
+  border-color: var(--mp-colors-emerald-700, #029861);
+  color: var(--mp-text-inverse);
+}
+.btn-enterprise--primary:hover {
+  background: var(--mp-colors-emerald-800, #186f4a);
+  border-color: var(--mp-colors-emerald-800, #186f4a);
+}
+/* OVERRIDE: an icon inside a primary button is ALWAYS white. currentColor icons
+   inherit the white text; icons that carry their own fill (airene-brand, brand
+   glyphs) would otherwise show their native colour, so force those white too. */
+.btn-enterprise--primary :is(.mp-icon, svg) { color: #fff !important; }
+.btn-enterprise--primary :is(.mp-icon, svg) [fill]:not([fill="none"]) { fill: #fff !important; }
+.btn-enterprise--primary :is(.mp-icon, svg) [stroke]:not([stroke="none"]) { stroke: #fff !important; }
+
+.btn-enterprise--danger {
+  background: var(--mp-colors-red-600, #dc2626);
+  border-color: var(--mp-colors-red-600, #dc2626);
+  color: var(--mp-text-inverse);
+}
+.btn-enterprise--danger:hover {
+  background: var(--mp-colors-red-700, #b91c1c);
+  border-color: var(--mp-colors-red-700, #b91c1c);
+}
+
+.btn-enterprise--active {
+  background: var(--mp-background-neutral-hovered);
+}
+
+/* Icon padding modifiers — use when button has a leading or trailing icon */
+.btn-enterprise--icon-before { padding-left: var(--mp-spacing-3); }
+.btn-enterprise--icon-after  { padding-right: var(--mp-spacing-3); }
+
+/* Icon-only button — square, no horizontal padding. Combine with a variant
+   (e.g. --secondary) for an icon-only action such as a "More actions" kebab. */
+.btn-enterprise--icon { width: 36px; height: 36px; padding: 0; }
+
+/* ── Button size: sm ──────────────────────────────────────────────────────────── */
+.btn-enterprise--sm {
+  padding: var(--mp-spacing-1) var(--mp-spacing-2);
+  font-size: var(--mp-font-sizes-sm);
+  line-height: var(--mp-line-heights-sm);
+}
+
+/* ── Button size: xs — a step down from sm, for tight row-action columns ───────── */
+.btn-enterprise--xs {
+  padding: var(--mp-sizes-0\.5, 2px) var(--mp-spacing-2);
+  font-size: var(--mp-font-sizes-sm);
+  line-height: var(--mp-line-heights-sm);
+}
+
+/* ── Button variant: plain (no border/background — bulk bar secondary action) ── */
+.btn-enterprise--plain {
+  background: transparent;
+  border-color: transparent;
+  color: var(--mp-text-secondary);
+}
+.btn-enterprise--plain:hover { background: var(--mp-background-neutral-hovered); }
+
+/* ── MpButton secondary — Enterprise override (global) ────────────────────────
+ * The project standard is to use Pixel <MpButton> per storybook. Pixel's secondary
+ * variant, however, renders a brand-blue label on a subtle/light border. The ERP
+ * secondary must read as a real, clickable action: DEFAULT (near-black) label on a
+ * DARK NEUTRAL border. Primary / ghost / danger are already correct — leave them.
+ *
+ * Target the stable recipe class `.mp-button--variant_secondary` (not the atomic
+ * Panda hashes). erp.css is UNLAYERED, so this beats Pixel's @layer pixel_recipes
+ * rules — including its :hover — without !important. See rule/btn-secondary-black. */
+.mp-button--variant_secondary,
+.mp-button--variant_secondary:hover,
+.mp-button--variant_secondary:focus-visible {
+  /* Use the fully-qualified --mp-colors-* tokens: the short aliases
+     (--mp-text-default / --mp-border-bold) resolve EMPTY in this Pixel build. */
+  color: var(--mp-colors-text-default, #080d0e);
+  border-color: var(--mp-colors-border-bold, #8c9596);
+}
+
+/* ── MpButton focus ring — neutral, not brand green ──────────────────────────
+ * Pixel's :focus-visible ring on a button is a brand-emerald BOX-SHADOW. The ERP
+ * uses a NEUTRAL focus everywhere (same as form fields: Slate400 #8C9596). Kill any
+ * outline and REPLACE the green shadow with a single neutral ring — one ring, not
+ * two. Applies to every MpButton. */
+.mp-button:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--mp-colors-border-bold, #8c9596) !important;
+}
+
+/* ── Action footer — responsive (form & modal footers) ───────────────────────
+ * Desktop: buttons hug content, right-aligned. Mobile (≤640px): footer buttons go
+ * FULL-WIDTH and STACK, primary on top (column-reverse — assumes DOM order = ghost
+ * Cancel then primary). Full-width here is RESPONSIVE-only, never the is-full-width
+ * prop. See rule/btn-responsive-footer + rule/btn-no-full-width. Applies to
+ * .erp-action-footer (form footers) and every MpModal footer. */
+.erp-action-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mp-spacing-2); /* 8px — same as every MpButtonGroup (rule/btn-group-gap-8) */
+}
+@media (max-width: 640px) {
+  .erp-action-footer,
+  .mp-modal__footer {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .erp-action-footer > .mp-button,
+  .erp-action-footer > .btn-enterprise,
+  .mp-modal__footer > .mp-button,
+  .mp-modal__footer > .btn-enterprise {
+    width: 100%;
+  }
+}
+
+/* ── MpModal backdrop — scrim (atomic-CSS gap remediation) ───────────────────
+ * The pulled Pixel build leaves the modal's full-screen overlay layer
+ * (.mp-modal__rootChild) transparent, so there's no dimmed backdrop behind a
+ * modal. Restore the scrim. erp.css is UNLAYERED so this wins without !important. */
+.mp-modal__rootChild {
+  background: var(--mp-colors-background-overlay, rgba(8, 13, 14, 0.55));
+}
+
+/* ── "Mark as completed" sales-order modal — 784px (Figma) ───────────────────
+ * MpModal size="lg" resolves to ~684px in this Pixel build; the Figma modal
+ * (Sales Orders / Mark As Completed, node 4502-37806) is 784px wide. Pixel sets
+ * the size width as an INLINE max-width on the contentChild, so !important is
+ * required to widen it. The marker class lands directly on the contentChild. */
+.mark-so-completed-content.mp-modal__contentChild,
+.mark-so-completed-content .mp-modal__contentChild {
+  max-width: 784px !important;
+  width: 784px !important;
+}
+
+/* ── Dropdown-button popover menu — fixed min-width 160px (ERP standard) ──────
+ * Every MpPopover used as a button dropdown / split-button menu uses this class on
+ * its MpPopoverContent. See rule/btn-dropdown-min-width. */
+.erp-dropdown-menu {
+  min-width: 160px;
+}
+
+/* ── Split button — chevron segment sizing ──────────────────────────────────
+ * MpButton's internal min-width compresses the chevron half of a split button.
+ * This override gives the trailing segment a fixed width (40px) and zeroes out
+ * the min-width so it stays a compact square with the icon centred. Applied via
+ * the shared class .detail-split-btn__chevron (used on all detail-page split
+ * buttons) and .cqd-split-caret (CRM quick-create drawer). */
+.detail-split-btn__chevron,
+.detail-split-chevron,
+.cqd-split-caret {
+  min-width: 0 !important;
+  width: 40px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.28) !important;
+}
+.detail-split-btn__main,
+.detail-split-main {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* ── Jump-to popover items (detail-jump-item / djt-item) ────────────────────
+ * MpButton centres its children (align-items: center). Jump-to items render
+ * the record name + subtitle stacked in a column — the centering makes them
+ * look wrong. Force left-align so the text sits flush-start. */
+.detail-jump-item,
+.djt-item {
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
+/* ── MpPopoverListItem hover (atomic-CSS gap remediation) ─────────────────────
+ * Pixel's hover rule is `.mp-popover-list-item:hover { background:
+ * var(--mp-background-neutral-hovered) }`, but that short alias resolves EMPTY in
+ * this build — so menu items show no hover state. Restore it with the fully-
+ * qualified --mp-colors-* token (+ hex fallback). Affects every popover menu
+ * (dropdown buttons, row action menus, ErpFilterSelect). */
+.mp-popover-list-item:hover {
+  /* neutral-hovered token resolves to a near-invisible #F8F9F9 in this build;
+     use slate-200 (#EBF0F1) so the hover is actually visible. */
+  background: var(--mp-colors-slate-200, #ebf0f1) !important;
+}
+
+/* ── MpToggle: disabled+ON state (global ERP override) ──────────────────────
+ * Show brand-selected palette (light green track, dark green knob) when the
+ * toggle is checked (ON) but disabled (read-only view mode).
+ *
+ * Panda's _disabled rule lives in @layer pixel_recipes._base with !important.
+ * @layer pixel_reset !important has higher cascade priority than pixel_recipes,
+ * so this override always wins regardless of specificity.
+ */
+@layer pixel_reset {
+  .mp-toggle__root:is([aria-disabled=true], [data-disabled]):is([aria-checked=true], [data-checked], [data-state=checked]) .mp-toggle__control {
+    background: var(--mp-colors-background-brand-selected, #d6f4e9) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+  .mp-toggle__root:is([aria-disabled=true], [data-disabled]):is([aria-checked=true], [data-checked], [data-state=checked]) .mp-toggle__control div {
+    background: var(--mp-colors-icon-selected, #029861) !important;
+  }
+}
+
+/* ── Toast: pill shape (global ERP override) ─────────────────────────────────
+ * Pixel's default toast uses a small border-radius. ERP design uses pill shape.
+ */
+[data-pixel-component="MpToast"] {
+  border-radius: var(--mp-radii-full, 999px) !important;
+}
+
+/* Toast label — MpToast's <p> has no white-space rule of its own, so a long
+   title wraps to a second line and breaks the pill (it also breaks the
+   toaster's centering fix above, which assumes single-line nowrap content).
+   Never let toast copy wrap; truncate with an ellipsis instead. */
+[data-pixel-component="MpToastLabel"] {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Form-field focus colour (global ERP override) ────────────────────────────
+ * Pixel's default focus border + ring on form fields is the brand emerald green.
+ * The ERP wants a neutral focus instead: Color/Gray/Slate400 (#8C9596).
+ *
+ * Applies to every Pixel form control (input, textarea, select, input-tag,
+ * datepicker). erp.css is UNLAYERED, so these rules beat Pixel's @layer rules
+ * regardless of specificity — no !important needed, and we don't have to chase
+ * every hover/focus permutation Pixel ships.
+ *
+ * Input-tag focuses its inner <input>, so the bordered trigger uses
+ * :focus-within; the other controls are the focusable element themselves.
+ */
+.mp-input__control:focus:not([aria-invalid="true"]):not([data-invalid]),
+.mp-textarea__control:focus:not([aria-invalid="true"]):not([data-invalid]),
+.mp-select__control:focus:not([aria-invalid="true"]):not([data-invalid]),
+.mp-datepicker__control:focus:not([aria-invalid="true"]):not([data-invalid]),
+.mp-input-tag__trigger:focus-within:not([aria-invalid="true"]):not([data-invalid]) {
+  border-color: #8c9596;
+  box-shadow: 0 0 0 1px #8c9596;
+}
+
+/* MpSelect specifically: its active/open state must show a clearly BOLD neutral
+ * border — the Pixel default renders a faint ~16%-alpha hairline. We target the
+ * root's :focus-within (higher specificity + reliable while the dropdown is open)
+ * and force the border/ring so it never stays thin. Applies to EVERY MpSelect.
+ * See docs/patterns/Form.md. */
+.mp-select__root:focus-within .mp-select__control:not([aria-invalid="true"]):not([data-invalid]),
+.mp-select__control[aria-expanded="true"]:not([aria-invalid="true"]):not([data-invalid]),
+.mp-select__control[data-state="open"]:not([aria-invalid="true"]):not([data-invalid]) {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: #8c9596 !important;
+  box-shadow: 0 0 0 1px #8c9596 !important;
+}
+
+/* Invalid fields keep a red focus border + ring (never the brand green). */
+.mp-input__control:focus[aria-invalid="true"],
+.mp-input__control:focus[data-invalid],
+.mp-textarea__control:focus[aria-invalid="true"],
+.mp-textarea__control:focus[data-invalid],
+.mp-select__control:focus[aria-invalid="true"],
+.mp-select__control:focus[data-invalid],
+.mp-datepicker__control:focus[aria-invalid="true"],
+.mp-datepicker__control:focus[data-invalid],
+.mp-input-tag__trigger:focus-within[aria-invalid="true"],
+.mp-input-tag__trigger:focus-within[data-invalid] {
+  border-color: var(--mp-colors-red-400, #e2483d);
+  box-shadow: 0 0 0 1px var(--mp-colors-red-400, #e2483d);
+}
+
+/* Custom search pills (index filter bars + detail/form search boxes) — one shared
+   neutral slate focus ring so focus looks identical everywhere. Each component's
+   scoped border wins over border-color here, so only the subtle ring is added.
+   The ring is INSET (drawn inside the box), never an outward box-shadow: filter
+   bars often sit flush against the top of a scroll/clip container (e.g. a stage
+   whose scroll area starts at the filter bar), and an OUTWARD 1px ring gets
+   clipped there — the search's top border reads as cut off. An inset ring can
+   never be clipped by an ancestor, so focus looks identical on every page. */
+.filter-search:focus-within,
+.pr-filter-search:focus-within,
+.rcvgd-search-wrap:focus-within,
+.cw-search:focus-within,
+.sad-search:focus-within {
+  border-color: #8c9596;
+  box-shadow: inset 0 0 0 1px #8c9596;
+}
+
+/* Base filter-bar search PILL box — global so a hand-rolled `#filters` bar can
+   never render a bare, borderless search (a recurring miss). A page's scoped
+   `.filter-search` still wins (its [data-v] attr raises specificity), so this only
+   fills in when a page forgot to copy the box. Width overridable via
+   `--filter-search-w`. Ring is added by the :focus-within rule above.
+   rule/filter-bar-search-pill */
+.filter-search {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  gap: var(--mp-spacing-2, 8px);
+  width: var(--filter-search-w, 248px);
+  padding: var(--mp-spacing-2, 8px) var(--mp-spacing-3, 12px);
+  background: var(--mp-colors-background-neutral, #fff);
+  border: 1px solid var(--mp-colors-border-default, #e3e7e9);
+  border-radius: var(--mp-radii-full, 999px);
+  color: var(--mp-colors-text-subtle, #79818b);
+}
+.filter-search .filter-search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--mp-font-sizes-md, 14px);
+  color: var(--mp-colors-text-default, #080d0e);
+}
+.filter-search .filter-search-input::placeholder { color: var(--mp-colors-text-placeholder, #97a0af); }
+
+/* ── Pixel @latest atomic-CSS gap remediation ─────────────────────────────────
+ * package.json pins @mekari/pixel3* to "latest" with no lockfile, so the pulled
+ * build emits component recipe classes + token vars but NOT the runtime atomic
+ * utilities (mp-bg-c_*, appearance:none, group/nextTheme conditionals). That
+ * leaves MpBadge with no fill/shape and MpSelect showing the native OS arrow +
+ * an always-visible clear (✕). Restore the pieces the ERP relies on here.
+ * erp.css is UNLAYERED, so these beat Pixel's @layer rules without !important. */
+
+/* Form control roots must establish a positioning context so their absolutely-
+   positioned addons (select/autocomplete arrow, datepicker calendar, clear button)
+   stay inside the field instead of escaping to a far ancestor — the `position:
+   relative` atomic isn't reliably emitted (esp. after a cold dev restart). */
+.mp-input__root,
+.mp-input-group__root,
+.mp-select__root,
+.mp-autocomplete__root,
+.mp-datepicker__root {
+  position: relative;
+}
+
+/* …and the addon (arrow / datepicker calendar / prefix-suffix) must be vertically
+   centered in the field. The atomic build leaves it at `top:38px; bottom:-32px`
+   (dropped below the field); re-center it here. */
+.mp-input-addon__root {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+/* MpSelect — strip the native OS dropdown arrow; Pixel renders its own arrow. */
+.mp-select__control {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* MpSelect — hide the is-clearable (✕) button while the field is empty
+   (the group-conditional utility that normally hides it isn't emitted). */
+.mp-select__root:has(> .mp-select__control[data-value=""]) .mp-select__clear {
+  display: none;
+}
+
+/* MpPopover dropdown/menu (autocomplete, select, kebab, filter menus) — the
+   teleported content panel keeps its position/z-index inline styles, but the
+   list + items render UNSTYLED in this Pixel build: `.mp-popover-list-item`
+   collapses to `display:inline-block; padding:0`, so an opened dropdown shows as
+   a 1-line sliver with the options mashed together. Restore the list/item layout
+   here (the panel's open/close is toggled via inline `display`, untouched). */
+.mp-popover--isUnstyled_false {
+  border-radius: var(--mp-radii-lg, 8px);
+  overflow: auto;
+}
+.mp-popover-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--mp-spacing-1, 4px);
+  gap: 1px;
+}
+.mp-popover-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--mp-sizes-9, 36px);
+  padding: var(--mp-spacing-2, 8px) var(--mp-spacing-3, 12px);
+  border: none;
+  background: transparent;
+  border-radius: var(--mp-radii-md, 6px);
+  font-size: var(--mp-font-sizes-md, 14px);
+  line-height: var(--mp-line-heights-md, 20px);
+  color: var(--mp-text-default);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.mp-popover-list-item:hover,
+.mp-popover-list-item[data-active="true"] {
+  background: var(--mp-background-neutral-hovered);
+}
+/* inner label/value wrapper (label + trailing selected-check) — the atomic
+   `mp-d_flex mp-ai_center mp-jc_space-between mp-w_full` utilities may be absent. */
+.mp-popover-list-item > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-spacing-2, 8px);
+  width: 100%;
+}
+
+/* MpBadge (status chips) — pill shape + per-type fill/text colour, resolved from
+   --mp-colors-* tokens (the badge's own mp-bg-c_* atomics aren't generated).
+   Covers both `for_tableStatus` (table rows) and `for_additionalInformation`
+   (next to a page-title H1 / detail-page header). */
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  min-height: var(--mp-sizes-5, 20px);
+  padding: var(--mp-spacing-0\.5, 2px) var(--mp-spacing-2);
+  border-radius: var(--mp-radii-full, 999px);
+  font-size: var(--mp-font-sizes-sm);
+  font-weight: var(--mp-font-weights-medium, 500);
+  line-height: var(--mp-line-heights-sm);
+  white-space: nowrap;
+}
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation).mp-badge--type_warning {
+  background: var(--mp-colors-orange-50, #fbf3dd);
+  color: var(--mp-colors-text-warning, #a14a0b);
+}
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation).mp-badge--type_information {
+  background: var(--mp-colors-blue-50, #eaecfb);
+  color: var(--mp-colors-text-information, #4b61dc);
+}
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation).mp-badge--type_completed {
+  background: var(--mp-colors-green-50, #e8f5eb);
+  color: var(--mp-colors-text-success, #0f6d4d);
+}
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation).mp-badge--type_critical {
+  background: var(--mp-colors-red-50, #fdecee);
+  color: var(--mp-colors-red-700, #c33e35);
+}
+:is(.mp-badge--for_tableStatus, .mp-badge--for_additionalInformation).mp-badge--type_announcement {
+  background: var(--mp-colors-gray-50, #edf0f2);
+  color: var(--mp-colors-text-secondary, #3a4749);
+}
+
+/* Page-tab count badge — a live counter, NOT a table-status chip. Override the
+   soft table-status fill above with the regular Pixel warning counter (solid
+   warning-bold fill + inverse text) so it reads as a count, not a status pill. */
+.mp-badge.page-tab-count.mp-badge--type_warning {
+  background: var(--mp-colors-background-warning-bold, #f5cd47);
+  color: var(--mp-colors-text-warning-inverse, #080d0e);
+}
+
+/* MpDatePicker calendar — restore the grid/flex layout the atomic utilities would
+   provide. With the missing atomics, the calendar's wrappers fall back to
+   display:block, so the weekday row and each week collapse into a single vertical
+   column. Re-establish the 7-column grid + side-by-side range panels here. */
+
+/* Range picker: the two month panels sit side by side. */
+.mp-calendarPanelRange { display: flex; gap: var(--mp-spacing-5); }
+
+/* Month header: prev button · label · next button. */
+.mp-tableDate__headerRoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-spacing-2);
+  margin-bottom: var(--mp-spacing-2);
+}
+.mp-tableDate__headerLabel {
+  flex: 1;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--mp-font-sizes-md);
+  font-weight: var(--mp-font-weights-semi-bold);
+  color: var(--mp-text-default);
+}
+
+/* Weekday header row and each week row: 7 equal columns. */
+.mp-tableDate__dayWrapper,
+.mp-tableDate__dateItemWrapper {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* Weekday label cell. */
+.mp-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--mp-sizes-8, 32px);
+  font-size: var(--mp-font-sizes-sm);
+  color: var(--mp-text-secondary);
+}
+
+/* Day cell button — keep it square and centered. */
+.mp-dateItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--mp-sizes-8, 32px);
+  height: var(--mp-sizes-8, 32px);
+}
+
+/* Month/year sub-panels (shown when the header label is clicked): grid of cells. */
+.mp-tableMonth__wrapper,
+.mp-tableYear__wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--mp-spacing-1);
+}
+
+/* ── Table cell form: no input/select border (project-wide rule) ──────────────
+ * Any .mp-select__control inside a cell marked .erp-td-form loses its own
+ * border — the column border is the visual boundary. erp.css is unlayered so
+ * this beats Pixel's @layer pixel_recipes rules without !important.
+ */
+.erp-td-form .mp-select__control {
+  border: none;
+  border-width: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ── Toast centering fix: when --width is max-content the toaster container
+   collapses to 0px (absolute children have no flow size), so individual toasts
+   must self-center. Also prevent text wrapping so width truly hugs content. ─── */
+[data-sonner-toaster][data-x-position="center"] [data-sonner-toast] {
+  left: 50%;
+  transform: translateX(-50%) var(--y);
+}
+[data-sonner-toast][data-styled="true"] {
+  white-space: nowrap;
+}
+
+/* ── Number inputs — hide the native up/down spinner everywhere in the app.
+   Keeping type="number" (not switching to text) preserves numeric-only input,
+   :min/:max clamping, and the numeric keyboard on mobile — just without the
+   spinner arrows cluttering table cells. ─────────────────────────────────── */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ─── Breadcrumbs are always regular weight ──────────────────────────────────
+   Breadcrumb links were migrated to MpButton, which is semibold by default, and a
+   few pages set semibold explicitly. Every breadcrumb class in the app contains
+   "breadcrumb" (detail-breadcrumb, nw-breadcrumb, cnb-breadcrumb-sep, …), so one
+   attribute rule normalises them all. !important beats MpButton's atomic class. */
+[class*="breadcrumb"] {
+  font-weight: var(--mp-font-weights-regular, 400) !important;
+}
+
+/* ─── Table cell link ─────────────────────────────────────────────────────────
+   The identifier value in a table cell (e.g. an order no., product name) is a
+   text link that opens the row's detail/preview. Replaces the old row-hover
+   "View details" / "Open preview" chip. Underlines on hover; sits inline so it
+   still truncates via the cell's own .cell-text rule. */
+.cell-link {
+  /* !important so this utility wins over per-cell value classes that set their
+     own color (e.g. .rcv-po__no { color: var(--mp-text-default) }).
+     Short alias --mp-text-link resolves EMPTY in this pulled build → use the long
+     token with a hex fallback so links are blue, not black. */
+  color: var(--mp-colors-text-link, #165082) !important;
+  cursor: pointer;
+  text-decoration: none;
+}
+.cell-link:hover { text-decoration: underline; }
+
+.detail-value-link {
+  color: var(--mp-colors-text-link, #165082);
+  cursor: pointer;
+  text-decoration: none;
+}
+.detail-value-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Badge for=additionalInformation — SOLID (not pastel) ─────────────────────
+   tableStatus stays pastel/subtle (in-row status); additionalInformation (beside
+   titles/tabs) is a bold, filled chip. In this pulled build both collapse to the
+   pastel set, so repaint additionalInformation per type: solid bold fill + white
+   text (warning yellow keeps dark text for contrast). */
+.mp-badge--for_additionalInformation.mp-badge--type_information { background: var(--mp-colors-background-information-bold, #4b61dc) !important; color: #fff !important; }
+.mp-badge--for_additionalInformation.mp-badge--type_completed { background: var(--mp-colors-background-brand-bold, #029861) !important; color: #fff !important; }
+.mp-badge--for_additionalInformation.mp-badge--type_critical { background: var(--mp-colors-background-danger-bold, #c33e35) !important; color: #fff !important; }
+.mp-badge--for_additionalInformation.mp-badge--type_announcement { background: var(--mp-colors-background-neutral-bold, #243032) !important; color: #fff !important; }
+.mp-badge--for_additionalInformation.mp-badge--type_warning { background: var(--mp-colors-background-warning-bold, #f5cd47) !important; color: #243032 !important; }
+/* icons inside a solid badge inherit the (white/dark) text colour */
+.mp-badge--for_additionalInformation svg { color: inherit !important; fill: currentColor !important; }
+
+/* ── Table header + row hover — visible grays ─────────────────────────────────
+   The intended header bg (neutral-subtle) and row hover (neutral-hovered) resolve
+   to a near-invisible #f8f9f9 in this pulled build. Substitute the design's actual
+   values so the header reads gray and the hover is perceptible (matches the spec in
+   docs/patterns/ErpTablePage.md: header #f1f5f9). Unlayered → beats Pixel atoms. */
+.erp-th { background: #f1f5f9 !important; }                     /* header gray (slate-100 token = near-white #f8f9f9 here) */
+.erp-tr:hover .erp-td { background: #f3f5f9 !important; }        /* row hover — light cool blue-gray */
+/* Row + header borders — short --mp-border-default resolves EMPTY here → borders
+   vanish. Restore with the long token + hex fallback so every row is separated. */
+.erp-th { border-bottom: 1px solid var(--mp-colors-border-default, #e3e7e9) !important; }
+.erp-tr { border-bottom: 1px solid var(--mp-colors-border-default, #e3e7e9) !important; }
+/* Horizontal scrollbar — --mp-border-bold is EMPTY here, so the styled thin bar
+   falls back to the OS default (thick). Force the thin thumb/track colours. */
+.erp-table-wrapper { scrollbar-color: #8c9596 #f1f5f9 !important; }
+.erp-table-wrapper::-webkit-scrollbar { height: 8px !important; }
+.erp-table-wrapper::-webkit-scrollbar-thumb { background: #c3c9ca !important; border-radius: 999px !important; border: 2px solid #f1f5f9 !important; }
+.erp-table-wrapper::-webkit-scrollbar-track { background: #f1f5f9 !important; }
+/* Sticky right columns (actions [...] + any isFixed col) need an OPAQUE background,
+   else scrolling row content bleeds under them. Header cell matches the gray header;
+   body cell is white and tracks the row hover. Left separator uses a visible border
+   (border tokens resolve EMPTY here). [...] aligns top on multiline rows. */
+.erp-th--actions, .erp-th--fixed { background: #f1f5f9 !important; }
+.erp-td--actions, .erp-td--fixed { background: var(--mp-colors-background-neutral, #fff) !important; }
+.erp-tr:hover .erp-td--actions, .erp-tr:hover .erp-td--fixed { background: #f3f5f9 !important; }
+.erp-table-wrapper.is-overflowing .erp-th--fixed,
+.erp-table-wrapper.is-overflowing .erp-td--fixed { box-shadow: inset 1px 0 0 0 var(--mp-colors-border-default, #e3e7e9) !important; }
+.erp-tr--align-top .erp-td--actions, .erp-tr--align-top .erp-td--fixed { vertical-align: top !important; }
+/* Bulk-bar action button must fit the fixed 28px header row (never grow it). MpButton
+   sm is a touch tall for 28px, so pin it compact — matches the WMS bulk bar. */
+.erp-bulk-bar__actions .mp-button,
+.erp-bulk-bar__actions button {
+  min-height: 0 !important;
+  height: 26px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ── Info toast — white surface, blue border, blue filled icon ────────────────
+   infoToast() rides Pixel's `greeting` variant (dark pill) and tags its content
+   with `.erp-info-toast`. We repaint ONLY that toast via :has() so the neutral
+   greeting/error/success toasts keep their native look. Icon colour is set on the
+   MpIcon itself (var(--mp-colors-blue-600)); here we do the surface + text. */
+.mp-toast__root--variant_greeting:has(.erp-info-toast) {
+  background: var(--mp-background-neutral, #fff) !important;
+  border: 1px solid var(--mp-colors-blue-600, #387ceb) !important;
+}
+.mp-toast__root--variant_greeting:has(.erp-info-toast) .mp-toast__label {
+  color: var(--mp-text-default, #1d1f24) !important;
+}
+
+/* ── Segmented control — ERP override (rule/segmented-control-pill) ────────────
+   Pixel 3 DT 2.4 Enterprise renders the active segment in brand green and squared
+   (and, in this pulled build, mostly unstyled: transparent track, 6px radius). The
+   ERP wants a PILL, and its active segment to read the same as the sidebar level-2
+   active nav (.panel-item.active → #E2E8F0 bg / #165082 text, semibold) — one
+   "which view am I on" signal. erp.css is unlayered, so this beats Pixel's atoms. */
+.mp-segmented-control__root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-spacing-1, 4px);
+  padding: 3px;
+  background: var(--mp-background-neutral-subtle, #f5f6f6);
+  border: 1px solid var(--mp-border-default, #e3e7e9);
+  border-radius: var(--mp-radii-full, 999px);
+  width: fit-content;
+}
+/* Equal-width segments; the pill (__control) fills its whole segment, not just the text. */
+.mp-segmented-control__item { border-radius: var(--mp-radii-full, 999px); flex: 1 1 0; min-width: 0; display: flex; cursor: pointer; }
+/* Visually-hidden radio (also covers the hand-rolled ErpIconSegmented, whose input
+   doesn't get Pixel's atomic hiding). */
+.mp-segmented-control__hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+/* The pill highlight is __control (present in BOTH the text and icon-only variants;
+   the text __label stacks on top of it). Pixel paints it green (#d6f4e9) when active —
+   we repaint it to the sidebar level-2 slate. Painting __control (not __label) means
+   the icon-only variant, which has no __label, still gets the active pill. */
+.mp-segmented-control__control {
+  background: transparent !important;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border-radius: var(--mp-radii-full, 999px) !important;
+  color: var(--mp-text-secondary, #3a4749);
+  cursor: pointer;
+  transition: background-color 120ms, color 120ms;
+}
+.mp-segmented-control__label {
+  font-size: var(--mp-font-sizes-md, 0.875rem);
+  color: var(--mp-text-secondary, #3a4749);
+  white-space: nowrap;
+}
+.mp-segmented-control__item:hover .mp-segmented-control__control {
+  background: var(--mp-background-neutral-subtle-hovered, #ebeeef) !important;
+}
+/* Active segment = sidebar level-2 active (.panel-item.active), NOT green. */
+.mp-segmented-control__item:has(input:checked) .mp-segmented-control__control {
+  background: #E2E8F0 !important;
+  color: var(--mp-text-link, #165082);
+}
+.mp-segmented-control__item:has(input:checked) .mp-segmented-control__label {
+  color: var(--mp-text-link, #165082);
+  font-weight: var(--mp-font-weights-semi-bold, 600);
+}
+
+/* ── MpTabs variant-color="green" — ERP override (global) ──────────────────────
+   Pixel 3 DT 2.4 Enterprise's "green" tab variant paints the selected tab + its
+   underline in a pale mint (mp-c_green.400, ~#7dc7a8) — reads as disabled, not
+   selected. Every detail page that got this right was doing so with its own
+   copy-pasted :deep() override (~24 pages); pages without one (e.g. Invite user's
+   Existing/Custom tabs) render the pale, wrong green. Fix it once, globally. */
+.mp-tab--variantColor_green.mp-tab--isSelected_true,
+.mp-tab--variantColor_green.mp-tab--isSelected_true:hover {
+  color: var(--mp-text-selected) !important;
+}
+.mp-tab-selected-border--isSelected_true {
+  background-color: var(--mp-border-selected, #029861) !important;
+}
+
+/* ── MpCheckbox — disabled control border (global ERP override) ────────────────
+   Pixel 3 DT 2.4 Enterprise's disabled checkbox border (~#ebf0f1) has almost no
+   contrast against the page's off-white background (~#f8f9f9) — a disabled-but-
+   available checkbox (e.g. "Access limitation" before its role is ticked) reads
+   as if the checkbox isn't there at all. Give it the same visible-but-muted
+   border every other disabled/inactive control in the ERP uses.
+   Same @layer pixel_reset trick as the MpToggle override above — Panda's
+   disabled rule lives in @layer pixel_recipes._base with !important, and
+   @layer pixel_reset has higher cascade priority, so this always wins. */
+@layer pixel_reset {
+  .mp-checkbox__root[aria-disabled="true"] .mp-checkbox__control {
+    border-color: var(--mp-border-default, #e3e7e9) !important;
+  }
+}
+
+/* ── Row kebab (`.row-kebab`) — icon must never collapse (global ERP override) ──
+   Many tables render the row "⋯" trigger as <MpButton class="row-kebab"> with a raw
+   inline <svg width="20"> child. Pixel's MpButton adds 16px left + right padding
+   (border-box); the page's `.row-kebab { width: 32px }` then leaves a 0px content
+   box, and the svg (a shrinkable flex item) renders 0px wide — the button is there
+   and clickable but invisible. Drop the horizontal padding and stop the icon from
+   shrinking so the 32px square always shows its three dots.
+   erp.css is UNLAYERED, so this beats Pixel's @layer padding without !important;
+   a page whose scoped `.row-kebab` sets its own padding (higher specificity) keeps
+   it. See rule/table-row-kebab-icon. */
+.row-kebab {
+  padding-left: 0;
+  padding-right: 0;
+}
+.row-kebab > svg {
+  flex-shrink: 0;
+}
