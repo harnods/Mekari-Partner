@@ -59,3 +59,21 @@ describe('sign-in with a +deleted address', () => {
     for (const k of ['company', 'jobPosition', 'role', 'phone'] as const) expect(p[k]).not.toBe('')
   })
 })
+
+describe('prototype session (gate off)', () => {
+  it('a fresh visitor is anonymous; mock sign-in persists; sign out clears it', async () => {
+    const g = globalThis as Record<string, unknown>
+    g.$fetch = async (url: string) => (url === '/api/auth/me' ? { gateEnabled: false, user: null } : {})
+    const { useAuth } = await import('~/composables/useAuth')
+    const auth = useAuth()
+    await auth.refresh()
+    expect(auth.status.value).toBe('anonymous')
+    auth.signInMock('rizal.candra@mekari.com')
+    await auth.refresh()
+    expect(auth.status.value).toBe('authed')
+    expect(auth.user.value?.email).toBe('rizal.candra@mekari.com')
+    await auth.signOut()
+    await auth.refresh()
+    expect(auth.status.value).toBe('anonymous')
+  })
+})

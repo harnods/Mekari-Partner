@@ -21,14 +21,32 @@ type Status = 'loading' | 'anonymous' | 'authed'
 const status = ref<Status>('loading')
 const user = ref<AuthUser | null>(null)
 
+/** Prototype session (no Google gate configured, e.g. the Vercel demo): the mock
+ *  sign-in is remembered per browser so a fresh visitor lands on /sign-in and
+ *  Sign out really signs out. */
+const MOCK_KEY = 'mp-mock-session'
+function readMock(): AuthUser | null {
+  try { const raw = localStorage.getItem(MOCK_KEY); return raw ? (JSON.parse(raw) as AuthUser) : null } catch { return null }
+}
+function writeMock(u: AuthUser | null): void {
+  try { if (u) localStorage.setItem(MOCK_KEY, JSON.stringify(u)); else localStorage.removeItem(MOCK_KEY) } catch { /* storage blocked */ }
+}
+
 export function useAuth() {
   /** Resolve the current session from the server. Called once by the gate on load.
    *  If the gate isn't configured on this deployment, the app is open (authed). */
   async function refresh(): Promise<void> {
     try {
       const res = await $fetch<{ gateEnabled: boolean; user: AuthUser | null }>('/api/auth/me')
-      user.value = res.user
-      status.value = 'authed' // gate off → open; gate on + valid session → authed
+      if (res.gateEnabled) {
+        user.value = res.user
+        status.value = 'authed' // gate on + valid session
+        return
+      }
+      // Gate off → prototype: signed in only after a mock sign-in in this browser.
+      const mock = readMock()
+      user.value = mock
+      status.value = mock ? 'authed' : 'anonymous'
     } catch {
       user.value = null
       status.value = 'anonymous'
@@ -52,6 +70,7 @@ export function useAuth() {
 
   async function signOut(): Promise<void> {
     await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+    writeMock(null)
     user.value = null
     status.value = 'anonymous'
   }
@@ -87,6 +106,7 @@ export function useAuth() {
     // Mock account directory decides the partner-org state for this account
     // ("+deleted" → org removed). One place, so every sign-in path applies it.
     usePartnerStatus().applyMockAccount(user.value.email)
+    writeMock(user.value)
     status.value = 'authed'
   }
 
