@@ -442,6 +442,10 @@ function seedTrainers(): BoRosterPerson[] {
   ]
 }
 
+const ROW_G_OTHER = (): BoAgreement[] => [
+  AG({ id: 'ag-g2', section: 'other', ma: 'ma5', name: 'Non-disclosure agreement · PT Garuda Integrasi Sistem', start: '2025-09-15', end: '2027-09-14', file: 'nda-garuda-signed.pdf' }),
+  AG({ id: 'ag-g3', section: 'other', ma: 'ma6', name: 'Data processing addendum · PT Garuda Integrasi Sistem', start: '2026-10-02', end: '2027-10-01', file: 'dpa-garuda-signed.pdf' }),
+]
 const ROW_G1 = (): BoAgreement => AG({ id: 'ag-g1', method: 'esign', ma: 'ma1', doc: 'MS-58211', start: '2026-10-02', end: '2027-10-01' })
 
 function seedPartners(): BoPartner[] {
@@ -455,7 +459,7 @@ function seedPartners(): BoPartner[] {
       phone: '+62 21 2900 4400', industry: 'IT services and consulting', product: 'Talenta', impl: true, specs: ['HR and payroll'], targets: ['Manufacturing', 'Logistics'], segments: ['Medium (101–300 employees)', 'Large (301–700 employees)'], deal: '251 mio–1 bio',
       idNo: '01.234.567.8-012.000', addr: 'Jl. M.H. Thamrin No. 10, Jakarta Pusat 10230', bank: 'BCA', holder: 'PT Garuda Integrasi Sistem', acct: '5270123456', tax: 'PKP', source: 'Landing page', acq: 'ZAT-20610', origin: 'Registration REG-0138', created: '2026-10-05',
       users: [U('andi@garudaintegrasi.co.id', 'Andi Kurniawan', 'Chief Executive Officer', 'Consultant', 'admin', '+62 811 900 1234'), U('lukas@garudaintegrasi.co.id', 'Lukas Wibowo', 'Implementation Lead', 'Implementer', 'user')],
-      agreements: [ROW_G1(), AG({ id: 'ag-g2', section: 'other', ma: 'ma5', name: 'Non-disclosure agreement · PT Garuda Integrasi Sistem', start: '2025-09-15', end: '2027-09-14', file: 'nda-garuda-signed.pdf' })] }),
+      agreements: [ROW_G1(), ...ROW_G_OTHER()] }),
     P({ id: 'P-0009', brand: 'Mitra Akuntansi', legal: 'CV Mitra Akuntansi Sejahtera', code: 'MPMITRA', status: 'Inactive', ae: 'kevin.halim@mekari.com', tech: 'melati.kusuma@mekari.com', prov: 'Jawa Barat', city: 'Bandung', web: 'https://mitraakuntansi.id', li: 'https://www.linkedin.com/company/mitraakuntansi',
       phone: '+62 22 4200 9911', industry: 'Accounting and tax services', product: 'Jurnal', impl: false, specs: ['Accounting and finance', 'Tax'], targets: ['Retail', 'Professional services'], segments: ['Micro (0–50 employees)', 'Small (51–100 employees)'], deal: '0–50 mio',
       idNo: '03.456.789.0-423.000', addr: 'Jl. Asia Afrika No. 77, Bandung 40111', bank: 'BNI', holder: 'CV Mitra Akuntansi Sejahtera', acct: '0912345678', tax: 'Non-PKP', source: 'Webinar Jan 2026', acq: 'ZAT-19410', origin: 'Registration REG-0098', created: '2026-01-20',
@@ -507,6 +511,7 @@ function seedTickets(): BoTicket[] {
     mk('REG-0141', 'PT Cakra Solusi Digital', 'MPCAKRA', 'Company', 'Agreement Drafting', { acq: 'ZAT-20702', ae: 'dimas.ardiansyah@mekari.com', date: '2026-10-16', submitter: 'Sari Wulandari', email: 'sari@cakrasolusi.co.id', job: 'Chief Operating Officer', checks: { ...ALL_VALID }, tax: 'PKP',
       agreements: [
         AG({ id: 'ag-c1', method: 'esign', ma: 'ma1', doc: 'MS-58307', start: '2026-11-01', end: '2027-10-31', remarks: 'Signers set up in Mekari Sign: Sari Wulandari and Hendra Gunawan.' }),
+        AG({ id: 'ag-c4', ma: 'ma2', name: 'Implementation agreement · PT Cakra Solusi Digital', start: '2026-10-25', end: '2027-10-24', remarks: 'Covers Talenta implementation projects.', file: 'implementation-cakra-signed.pdf' }),
         AG({ id: 'ag-c2', section: 'other', ma: 'ma5', name: 'Non-disclosure agreement · PT Cakra Solusi Digital', start: '2026-10-20', end: '2028-10-19', file: 'nda-cakra-signed.pdf' }),
         AG({ id: 'ag-c3', section: 'other', ma: 'ma6', name: 'Data processing addendum · PT Cakra Solusi Digital', start: '2026-11-01', end: '2027-10-31', remarks: 'Waiting for the partner to return the signed copy.' }),
       ],
@@ -514,7 +519,7 @@ function seedTickets(): BoTicket[] {
     mk('REG-0140', 'Nusa Cloud', 'MPNUSA', 'Company', 'Agreement Drafting', { legal: 'PT Nusa Cloud Integrasi', source: 'Partner link', product: 'Mekari Sign', partnerId: 'P-0012', acq: 'ZAT-20688', ae: 'putri.anggraini@mekari.com', aeFrom: 'link', date: '2026-10-15', submitter: 'Maya Hartono', email: 'maya@nusacloud.co.id', job: 'Partnership Lead', checks: { ...ALL_VALID }, tax: 'PKP',
       web: 'https://nusacloud.co.id', li: 'https://www.linkedin.com/company/nusacloud',
       log: [L('Submitted through the registration form link of P-0012. Created in Registration Request. Zoho acquisition ticket ZAT-20688 created.', 'System', '2026-10-15T09:20'), L('Registration Request → Data Validation', 'Putri Anggraini', '2026-10-15T13:05'), L('Data Validation → Agreement Drafting', 'Putri Anggraini', '2026-10-17T11:30')] }),
-    mk('REG-0138', 'Garuda Integrasi', 'MPGARUDA', 'Company', 'Completed', { legal: 'PT Garuda Integrasi Sistem', acq: 'ZAT-20610', ae: 'dimas.ardiansyah@mekari.com', partnerId: 'P-0007', date: '2026-10-02', submitter: 'Andi Kurniawan', email: 'andi@garudaintegrasi.co.id', job: 'Chief Executive Officer', prov: 'DKI Jakarta', city: 'Jakarta Pusat', checks: { ...ALL_VALID }, tax: 'PKP', agreements: [ROW_G1()],
+    mk('REG-0138', 'Garuda Integrasi', 'MPGARUDA', 'Company', 'Completed', { legal: 'PT Garuda Integrasi Sistem', acq: 'ZAT-20610', ae: 'dimas.ardiansyah@mekari.com', partnerId: 'P-0007', date: '2026-10-02', submitter: 'Andi Kurniawan', email: 'andi@garudaintegrasi.co.id', job: 'Chief Executive Officer', prov: 'DKI Jakarta', city: 'Jakarta Pusat', checks: { ...ALL_VALID }, tax: 'PKP', agreements: [ROW_G1(), ...ROW_G_OTHER()],
       log: [created('ZAT-20610', 'System', '2026-10-02T08:55'), L('Registration Request → Data Validation', 'Dimas Ardiansyah', '2026-10-02T13:40'), L('Data Validation → Agreement Drafting', BO_ME, '2026-10-03T10:12'), L('Agreement Drafting → Completed. Zoho acquisition ticket updated.', BO_ME, '2026-10-05T14:10')] }),
     mk('REG-0136', 'PT Maju Bersama Teknik', 'MPMAJU', 'Company', 'Rejected', { acq: 'ZAT-20577', ae: 'kevin.halim@mekari.com', date: '2026-09-29', submitter: 'Teguh Santoso', email: 'teguh@majubersama.co.id', job: 'Owner', klik: 'Invalid',
       checks: { legal: 'Invalid', company: 'Valid', market: 'Valid' }, reason: 'The NPWP number does not match the legal name on the uploaded document.', rejectedOn: '2026-10-01',

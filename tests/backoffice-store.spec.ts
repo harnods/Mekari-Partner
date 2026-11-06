@@ -75,7 +75,7 @@ describe('completeTicket()', () => {
     expect(p.id).toBe('P-0016')
     expect(p.status).toBe('Registered')
     expect(p.users[0]).toMatchObject({ email: 'sari@cakrasolusi.co.id', role: 'admin' })
-    expect(p.agreements).toHaveLength(3)
+    expect(p.agreements).toHaveLength(4)
     expect(t.stage).toBe('Completed')
     expect(t.partnerId).toBe('P-0016')
   })

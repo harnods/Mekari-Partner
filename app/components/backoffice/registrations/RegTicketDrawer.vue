@@ -156,7 +156,6 @@ function openPartner() {
             <span class="rtd-title">
               <span class="rtd-title__text">{{ ticket.brand }}</span>
               <ErpStatusBadge badge-for="additionalInformation" :status="ticket.stage" :label="t(ticket.stage)" />
-              <ErpStatusBadge v-if="locked" badge-for="additionalInformation" status="locked" type="announcement" :label="t('Locked')" />
             </span>
             <MpButton class="rtd-close" variant="ghost" :aria-label="t('Close')" @click="emit('close')"><MpIcon name="close" size="md" /></MpButton>
           </header>
@@ -228,7 +227,7 @@ function openPartner() {
         </MpBanner>
 
         <!-- J-06 Agreements -->
-        <BoAgreementSection v-if="showAgreements" :owner="{ kind: 'ticket', id: ticket.id }" @changed="clearErr" />
+        <BoAgreementSection v-if="showAgreements" compact :owner="{ kind: 'ticket', id: ticket.id }" @changed="clearErr" />
 
         <!-- Data sections -->
         <section v-for="[key, title] in BO_SECTIONS" :key="key" class="rtd-card">

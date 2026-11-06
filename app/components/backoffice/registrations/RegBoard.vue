@@ -273,7 +273,7 @@ function onClick(id: string) {
 .rb-col-head { display: flex; flex-direction: column; gap: 2px; padding: var(--mp-spacing-3) var(--mp-spacing-3) var(--mp-spacing-2); }
 .rb-col-title-row { display: flex; align-items: center; gap: var(--mp-spacing-1); }
 .rb-col-title { font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-default); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rb-col-count { flex-shrink: 0; margin-left: var(--mp-spacing-1); font-size: var(--mp-font-sizes-sm); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-secondary); background: var(--mp-background-neutral, #fff); border-radius: 999px; padding: 1px 8px; }
+.rb-col-count { flex-shrink: 0; margin-left: var(--mp-spacing-1); font-size: var(--mp-font-sizes-sm); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-colors-text-warning-inverse, #080d0e); background: var(--mp-colors-background-warning-bold, #f5cd47); border-radius: 999px; padding: 1px 8px; }
 .rb-col-info { display: inline-flex; flex-shrink: 0; color: var(--mp-icon-subtle, #97a0af); cursor: help; border-radius: 999px; }
 .rb-col-info:hover, .rb-col-info:focus-visible { color: var(--mp-icon-default, #536062); }
 .rb-col-reason { font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-danger, #c9372c); }

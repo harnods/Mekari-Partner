@@ -37,7 +37,9 @@ const props = withDefaults(defineProps<{
   owner: BoOwner
   sections?: AgSection[]
   readOnly?: boolean | null
-}>(), { sections: () => ['pa', 'other'], readOnly: null })
+  /** Drawer use: empty = one left-aligned line (no illustration); New document always in the header. */
+  compact?: boolean
+}>(), { sections: () => ['pa', 'other'], readOnly: null, compact: false })
 const emit = defineEmits<{ changed: [msg: string] }>()
 const { t } = useLocale()
 
@@ -102,12 +104,13 @@ function onConfirmDelete() {
             {{ t(SECTION_META[s].caption) + (isTicket && !editable ? ' ' + t('Read-only outside Agreement Drafting.') : '') }}
           </span>
         </div>
-        <MpButton v-if="editable && views[s].length" variant="secondary" is-rounded left-icon="add" @click="onAdd(s)">{{ t('New document') }}</MpButton>
+        <MpButton v-if="editable && (views[s].length || compact)" variant="secondary" is-rounded left-icon="add" @click="onAdd(s)">{{ t('New document') }}</MpButton>
       </header>
       <span v-if="addErr[s]" class="bas-err">{{ addErr[s] }}</span>
 
       <!-- Empty — rule/empty-state-structure (compact, in-section) -->
-      <div v-if="!views[s].length" class="bas-empty">
+      <p v-if="!views[s].length && compact" class="bas-empty-line">{{ t(SECTION_META[s].empty) }}</p>
+      <div v-else-if="!views[s].length" class="bas-empty">
         <img src="/illustrations/empty-folder.png" alt="" class="bas-empty__art" />
         <span class="bas-empty__title">{{ t(SECTION_META[s].empty) }}</span>
         <span class="bas-caption">{{ editable ? t('Add a document to track its signing status.') : t('Documents appear here once added.') }}</span>
@@ -176,6 +179,7 @@ function onConfirmDelete() {
 .bas-caption { font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary); }
 .bas-err { font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-danger); }
 
+.bas-empty-line { margin: 0; font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md); color: var(--mp-text-secondary); }
 .bas-empty { display: flex; flex-direction: column; align-items: center; gap: var(--mp-spacing-2); padding: var(--mp-spacing-4) 0; text-align: center; }
 .bas-empty__art { width: 96px; height: auto; }
 .bas-empty__title { font-size: var(--mp-font-sizes-md); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-default); }
