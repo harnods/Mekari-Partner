@@ -7,6 +7,11 @@ useHead({ title: 'Pixel 3 · Enterprise components — Mekari ERP' })
 // Sidebar nav — every component is its own page under /pixel/<slug>
 const sidebar = [
   {
+    label: 'Overview', items: [
+      { slug: 'theme', label: 'Theme — Mekari Partner' },
+    ],
+  },
+  {
     label: 'Actions', items: [
       { slug: 'button', label: 'Button' },
       { slug: 'erp-button', label: 'ERP button (deprecated)' },

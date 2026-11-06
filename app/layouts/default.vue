@@ -12,6 +12,8 @@ import { isHrPath } from '~/utils/hrRoutes'
 const route = useRoute()
 const isHr = computed(() => isHrPath(route.path))
 const isCrm = computed(() => route.path.startsWith('/crm'))
+// Backoffice (Mekari Partner internal portal) owns its own sidebar.
+const isBackoffice = computed(() => route.path.startsWith('/backoffice'))
 // No CRM access → the /crm route shows the paywall full-bleed, with NO level-1
 // sidebar at all (not even the ERP one). See useCrmAccess + CrmPaywallPage.
 const { hasCrmAccess } = useCrmAccess()
@@ -20,20 +22,26 @@ const crmPaywall = computed(() => isCrm.value && !hasCrmAccess.value)
 const { showProductMenu } = useProductMenu()
 // A report page can request a chrome-less full-screen view (header + nav hidden).
 const { isReportFullscreen } = useReportFullscreen()
+// Home (/) is full-bleed: no left sidebar, the stage spans the whole container.
+const isHome = computed(() => route.path === '/' || route.path === '/home')
+// Dev 12-col grid overlay (toggle with Shift+G, or window.__mpGrid.show()).
+const { visible: gridVisible } = useGridOverlay()
 </script>
 
 <template>
   <div class="app-shell">
-    <ErpHeader v-if="!isReportFullscreen" />
+    <PartnerHeader v-if="!isReportFullscreen" />
     <div class="main-container" :class="{ 'main-container--rail': showProductMenu && !isReportFullscreen, 'main-container--fullscreen': isReportFullscreen }">
-      <template v-if="!isReportFullscreen">
+      <template v-if="!isReportFullscreen && !isHome">
         <ErpNavbarGroup v-if="showProductMenu" />
-        <HrSidebar v-if="isHr" />
+        <BackofficeSidebar v-if="isBackoffice" />
+        <HrSidebar v-else-if="isHr" />
         <CrmSidebar v-else-if="isCrm && !crmPaywall" />
         <ErpSidebar v-else-if="!crmPaywall" />
       </template>
       <div class="content-area">
         <slot />
+        <GridOverlay v-if="gridVisible" />
       </div>
     </div>
     <MpToastManager />
@@ -54,34 +62,74 @@ const { isReportFullscreen } = useReportFullscreen()
  */
 
 :root {
-  /* Background */
-  --mp-background-surface-bold: #142d26;
-  --mp-background-surface: #f8f9f9;
-  --mp-background-stage: #ffffff;
-  --mp-background-neutral: #ffffff;
-  --mp-background-neutral-subtle: #f8f9f9;
-  --mp-background-neutral-hovered: #f8f9f9;
-  --mp-background-neutral-pressed: #ebf0f1;
-  --mp-background-neutral-subtle-hovered: #ebf0f1;
-  --mp-background-nav-stack-hovered: #d6f4e9;
-
-  /* Border */
-  --mp-border-default: #e3e7e9;
-  --mp-border-bold: #8c9596;
-
-  /* Text */
-  --mp-text-default: #080d0e;
-  --mp-text-inverse: #ffffff;
-  --mp-text-secondary: #3a4749;
+  /* ── Short-alias layer — re-based onto Pixel's --mp-colors-* ───────────────
+   * Each short --mp-* alias references Pixel's generated --mp-colors-* token
+   * (the full v2.4 Enterprise set Pixel injects on <body>), with the Enterprise
+   * hex kept as SSR/no-JS fallback. Because every ERP component reads these
+   * short aliases, the Mekari Partner layer
+   * (app/assets/css/tokens/mekari-partner.css) can recolor the whole app by
+   * overriding --mp-colors-* once — ERP chrome AND Pixel components together. */
+  --mp-background-brand: var(--mp-colors-background-brand, #f0fbf7);
+  --mp-background-brand-bold: var(--mp-colors-background-brand-bold, #029861);
+  --mp-background-brand-bold-hovered: var(--mp-colors-background-brand-bold-hovered, #0f6d4d);
+  --mp-background-brand-bold-selected: var(--mp-colors-background-brand-bold-selected, #0f6d4d);
+  --mp-background-brand-selected: var(--mp-colors-background-brand-selected, #d6f4e9);
+  --mp-background-danger: var(--mp-colors-background-danger, #fceeed);
+  --mp-background-disabled: var(--mp-colors-background-disabled, #f8f9f9);
+  --mp-background-highlight: var(--mp-colors-background-highlight, #f3f1fc);
+  --mp-background-information: var(--mp-colors-background-information, #eef0fc);
+  --mp-background-information-bold: var(--mp-colors-background-information-bold, #4b61dc);
+  --mp-background-inverse: var(--mp-colors-background-inverse, #1d2125);
+  --mp-background-nav-stack-hovered: var(--mp-colors-background-nav-stack-hovered, #d6f4e9);
+  --mp-background-neutral: var(--mp-colors-background-neutral, #ffffff);
+  --mp-background-neutral-bold: var(--mp-colors-background-neutral-bold, #243032);
+  --mp-background-neutral-hovered: var(--mp-colors-background-neutral-hovered, #f8f9f9);
+  --mp-background-neutral-pressed: var(--mp-colors-background-neutral-pressed, #ebf0f1);
+  --mp-background-neutral-selected: var(--mp-colors-background-neutral-selected, #f8f9f9);
+  --mp-background-neutral-subtle: var(--mp-colors-background-neutral-subtle, #f8f9f9);
+  --mp-background-neutral-subtle-hovered: var(--mp-colors-background-neutral-subtle-hovered, #ebf0f1);
+  --mp-background-neutral-subtle-selected: var(--mp-colors-background-neutral-subtle-selected, #ebf0f1);
+  --mp-background-stage: var(--mp-colors-background-stage, #ffffff);
+  --mp-background-success: var(--mp-colors-background-success, #f2f9f6);
+  --mp-background-success-bold: var(--mp-colors-background-success-bold, #1c8459);
+  --mp-background-surface: var(--mp-colors-background-surface, #f8f9f9);
+  --mp-background-surface-bold: var(--mp-colors-background-surface-bold, #142d26);
+  --mp-background-warning: var(--mp-colors-background-warning, #fdf6dd);
+  --mp-background-warning-bold: var(--mp-colors-background-warning-bold, #f5cd47);
+  --mp-border-bold: var(--mp-colors-border-bold, #8c9596);
+  --mp-border-brand: var(--mp-colors-border-brand, #0f6d4d);
+  --mp-border-danger: var(--mp-colors-border-danger, #e2483d);
+  --mp-border-default: var(--mp-colors-border-default, #e3e7e9);
+  --mp-border-default-subtle: var(--mp-colors-border-default-subtle, #ebf0f1);
+  --mp-border-focused: var(--mp-colors-border-focused, #41c6a0);
+  --mp-border-form: var(--mp-colors-border-form, #1d1f2429);
+  --mp-border-information: var(--mp-colors-border-information, #6577e2);
+  --mp-border-selected: var(--mp-colors-border-selected, #029861);
+  --mp-border-success: var(--mp-colors-border-success, #029861);
+  --mp-border-warning: var(--mp-colors-border-warning, #f5cd47);
+  --mp-icon-brand: var(--mp-colors-icon-brand, #029861);
+  --mp-icon-danger: var(--mp-colors-icon-danger, #c33e35);
+  --mp-icon-default: var(--mp-colors-icon-default, #536062);
+  --mp-icon-disabled: var(--mp-colors-icon-disabled, #8c9596);
+  --mp-icon-information: var(--mp-colors-icon-information, #6577e2);
+  --mp-icon-subtle: var(--mp-colors-icon-subtle, #e3e7e9);
+  --mp-icon-success: var(--mp-colors-icon-success, #1fb088);
+  --mp-icon-warning: var(--mp-colors-icon-warning, #e46910);
+  --mp-text-danger: var(--mp-colors-text-danger, #a8352d);
+  --mp-text-default: var(--mp-colors-text-default, #080d0e);
+  --mp-text-disabled: var(--mp-colors-text-disabled, #8c9596);
+  --mp-text-information: var(--mp-colors-text-information, #4b61dc);
+  --mp-text-inverse: var(--mp-colors-text-inverse, #ffffff);
+  --mp-text-inverse-static: var(--mp-colors-text-inverse-static, #ffffff);
+  --mp-text-link: var(--mp-colors-text-link, #165082);
+  --mp-text-placeholder: var(--mp-colors-text-placeholder, #6e7a7c);
+  --mp-text-secondary: var(--mp-colors-text-secondary, #3a4749);
+  --mp-text-secondary-pressed: var(--mp-colors-text-secondary-pressed, #243032);
+  --mp-text-selected: var(--mp-colors-text-selected, #0f6d4d);
+  --mp-text-success: var(--mp-colors-text-success, #0f6d4d);
+  --mp-text-warning: var(--mp-colors-text-warning, #a14a0b);
+  /* no --mp-colors-* counterpart — kept literal */
   --mp-text-subtle: #6e7a7c;
-  --mp-text-placeholder: #6e7a7c;
-  --mp-text-selected: #0f6d4d;
-  --mp-text-link: #165082;
-  --mp-text-disabled: #8c9596;
-  --mp-text-danger: #a8352d;
-
-  /* Background — inverse */
-  --mp-background-inverse: #142d26;
 
   /* Typography */
   --mp-fonts-body: "Inter", -apple-system, BlinkMacSystemFont, Helvetica, Arial,
@@ -142,7 +190,8 @@ body {
   background: var(--mp-background-neutral-subtle, #f8f9f9);
   border-left: 2px solid var(--mp-background-surface-bold);
   border-right: 2px solid var(--mp-background-surface-bold);
-  border-radius: 12px 12px 0 0;
+  border-bottom: 2px solid var(--mp-background-surface-bold);
+  border-radius: 12px;
 }
 
 /* With the product rail shown, a dark-green backing sits behind the module-nav so
@@ -168,5 +217,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   background: var(--mp-background-neutral-subtle, #f8f9f9);
+  /* anchor for the absolutely-positioned GridOverlay */
+  position: relative;
 }
 </style>

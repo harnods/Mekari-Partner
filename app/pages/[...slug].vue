@@ -116,6 +116,9 @@ const titleBreadcrumb = computed(() => MODULE_PARENT[currentPageKey.value] ?? nu
  *  (Settings › "Users & Roles" opens a page titled "User management"). */
 const PAGE_TITLE_OVERRIDES: Record<string, string> = {
   'Users and roles': 'User management',
+  // Dev reference route (/base-template) — not in the sidebar, so the active
+  // menu label would otherwise fall back to 'Home'. Pin its own H1 + tab title.
+  'Base template': 'Base template',
 }
 const resolvedPageTitle = computed(() => {
   if (PAGE_TITLE_OVERRIDES[currentPageKey.value]) return PAGE_TITLE_OVERRIDES[currentPageKey.value]!
@@ -138,10 +141,13 @@ const titleMeta = computed(() => {
 // only). Off-nav module pages use their own title, not the section they're
 // anchored to — otherwise every VAT reconciliation page reads "Tax".
 useHead({
-  title: () => `Mekari ERP | ${displayLabel(resolvedPageTitle.value)}`,
+  title: () => `Mekari Partner | ${displayLabel(resolvedPageTitle.value)}`,
 })
 
 const pageRegistry: Record<string, Component> = {
+  // Reusable starter template for new list/index pages — reachable at /base-template.
+  // See app/components/pages/BaseListPage.vue; also showcased on /pixel/theme.
+  'Base template':     defineAsyncComponent(() => import('~/components/pages/BaseListPage.vue')),
   'Home':              defineAsyncComponent(() => import('~/components/pages/HomePage.vue')),
   'Cowork':            defineAsyncComponent(() => import('~/components/pages/CoworkPage.vue')),
   'Cowork tasks':      defineAsyncComponent(() => import('~/components/pages/CoworkPage.vue')),
@@ -2721,7 +2727,7 @@ function startResize(e: MouseEvent) {
         </button>
       </div>
 
-      <div class="stage" :class="{ 'stage--flush': currentPageKey === 'Wms report' || currentPageKey === 'Sales report' || currentPageKey === 'Inventory report' || currentPageKey === 'Financial report' || currentPageKey === 'Purchase report' || currentPageKey === 'Tax report' || currentPageKey === 'Cash and bank report', 'stage--flush-top': currentPageKey === 'Hr' || currentPageKey === 'Home' }">
+      <div class="stage" :class="{ 'stage--flush': currentPageKey === 'Wms report' || currentPageKey === 'Sales report' || currentPageKey === 'Inventory report' || currentPageKey === 'Financial report' || currentPageKey === 'Purchase report' || currentPageKey === 'Tax report' || currentPageKey === 'Cash and bank report', 'stage--flush-top': currentPageKey === 'Hr' || (currentPageKey === 'Home' && xpmActiveScenario === 'XPM'), 'stage--home': currentPageKey === 'Home' && xpmActiveScenario !== 'XPM' }">
         <!-- Several warehouses in scope: where the work is, not which products. -->
         <MpBanner v-if="cycleCountBannerMulti" variant="info" class="cycle-count-banner">
           <MpBannerIcon name="info" />
@@ -3395,13 +3401,14 @@ function startResize(e: MouseEvent) {
   border-radius: var(--mp-radii-xl) var(--mp-radii-xl) 0 0;
   overflow-x: hidden;
   overflow-y: auto;
-  /* side/bottom padding scrolls with content; the top gap is a fixed border
+  /* 24px gutter on all four sides (rule/stage-padding-24). Sides + bottom are
+     24px padding (they scroll with content); the top gap is a fixed border
      (borders don't scroll) so content keeps a 24px gap from the stage's top edge.
-     The gap is 23px border + 1px padding (still 24px total): the 1px padding lands
-     the first child JUST inside the overflow clip boundary, so a top-border element
-     flush at the top (e.g. the rounded filter-bar search) isn't shaved by the clip.
-     Bottom is 80px so the last row of content clears the fold with breathing room. */
-  padding: 1px var(--mp-spacing-6) var(--mp-spacing-20, 80px);
+     The top gap is 23px border + 1px padding (still 24px total): the 1px padding
+     lands the first child JUST inside the overflow clip boundary, so a top-border
+     element flush at the top (e.g. the rounded filter-bar search) isn't shaved by
+     the clip. */
+  padding: var(--mp-sizes-0\.25, 1px) var(--mp-spacing-6) var(--mp-spacing-6);
   border-top: calc(var(--mp-spacing-6) - 1px) solid var(--mp-background-stage);
   /* Keep focus scroll-into-view clear of the fixed top border too. */
   scroll-padding-top: var(--mp-spacing-6);
@@ -3414,6 +3421,16 @@ function startResize(e: MouseEvent) {
 .stage.stage--flush-top {
   border-top-width: 0;
   border-radius: 0;
+}
+/* Partner Home: the stage IS the 12-col grid container (rule/grid-12-col) — a plain
+   24px padding on all four sides (no border-gap trick; Home's first child has no top
+   border to protect), keeping the rounded top corners. The mint hero gradient is the
+   stage's own background so it's full-bleed edge-to-edge (behind the 24px padding),
+   and the white Home cards float on top of it. */
+.stage.stage--home {
+  padding: var(--mp-spacing-6);
+  border-top-width: 0;
+  background: linear-gradient(180deg, #e1f6f0 0%, var(--mp-background-stage, #ffffff) 100%);
 }
 /* Report index draws an edge-to-edge card grid — no stage padding/top gap. */
 .stage--flush {

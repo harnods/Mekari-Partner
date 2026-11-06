@@ -1,0 +1,76 @@
+/*
+ * ── Mekari Partner — theme override layer ───────────────────────────────────
+ *
+ * Layer architecture:
+ *   Layer 1 (BASE)   = Pixel 3 Token v2.4 "Enterprise". Pixel injects the full
+ *                      token set onto <html> at runtime (theme-next.json):
+ *                        [data-panda-theme=next]         → base --mp-colors-*
+ *                        [data-product-theme=enterprise] → enterprise overrides
+ *                      e.g. --mp-colors-background-brand-bold: var(--mp-colors-emerald-700)
+ *                           --mp-colors-emerald-700: #029861
+ *                      Pixel is the source of truth — we do NOT copy that set.
+ *
+ *   Layer 2 (THEME)  = THIS FILE. A thin layer on top of Enterprise that
+ *                      overwrites only the brand colors for Mekari Partner.
+ *
+ * How it cascades everywhere:
+ *   - Pixel's own component recipes read --mp-colors-* directly.
+ *   - The ERP short aliases (--mp-background-*, --mp-text-*, …) are re-based in
+ *     app/layouts/default.vue to `var(--mp-colors-*)`, so they inherit too.
+ *   So overriding a --mp-colors-* primitive or semantic below recolors BOTH
+ *   Pixel components and the custom ERP chrome at once.
+ *
+ * Specificity: Pixel defines vars at `[data-product-theme=enterprise]` (0,1,0)
+ * on <html>. We use `html[data-product-theme=enterprise]` (0,1,1) + load LAST
+ * (nuxt.config.ts css[]), so these win.
+ *
+ * ── Mekari Partner palette ──────────────────────────────────────────────────
+ *   Brand green   #4EA67D  → primary button / brand accents
+ *   Chrome navy   #0B257E  → header bar + dark app surface (sidebar)
+ *   Neutral gray  #6D6E6E  → secondary text + bold border
+ *   Info blue     #99B4DF  → info background (periwinkle)
+ *   Light blue    #E8EFFD  → "blue-50" subtle info/highlight background
+ *   Surface       #FAFAFA  → app light surface
+ */
+
+html[data-product-theme="enterprise"] {
+  /* ── Brand green — remaps the emerald scale the Enterprise brand resolves to ──
+   * 700 = primary button fill (given). 800/900 = hover/pressed (derived darker).
+   * 100–300 = subtle brand backgrounds (derived light tints). */
+  --mp-colors-emerald-100: #ecf6f1;
+  --mp-colors-emerald-200: #d7ede4;
+  --mp-colors-emerald-300: #bbe0cf;
+  --mp-colors-emerald-700: #4ea67d; /* primary button (given) */
+  --mp-colors-emerald-800: #3f8a68; /* hover / selected text / brand border (derived) */
+  --mp-colors-emerald-900: #336f54; /* pressed (derived) */
+
+  /* ── Chrome navy — emerald-1000 is the dark app surface + header bar ──────── */
+  --mp-colors-emerald-1000: #0b257e; /* header bar + surface-bold / sidebar (given) */
+  --mp-colors-background-header-menu-selected: #4ea67d; /* active nav → brand green */
+  --mp-colors-background-header-menu-hovered: #ffffff1f; /* subtle white veil on navy */
+
+  /* ── Neutral gray (given) ────────────────────────────────────────────────── */
+  --mp-colors-text-secondary: #6d6e6e;
+  --mp-colors-border-bold: #6d6e6e;
+
+  /* ── Info / blue family — remaps the indigo scale (Enterprise "info") ─────────
+   * Enterprise info resolves to indigo: background-information = indigo-100,
+   * info-bold/text = indigo-700, icon/border-information = indigo-600. */
+  --mp-colors-indigo-100: #e8effd; /* "blue-50" light info/highlight bg (given) */
+  --mp-colors-indigo-200: #d6e4fa; /* derived */
+  --mp-colors-indigo-300: #99b4df; /* periwinkle (given) */
+  --mp-colors-indigo-400: #7d9ed6; /* derived */
+  --mp-colors-indigo-600: #3e63c0; /* info icon/border (derived) */
+  --mp-colors-indigo-700: #2e52c4; /* info bold / info text (derived) */
+  --mp-colors-background-information: #99b4df; /* info background = periwinkle (given) */
+
+  /* ── Light surface (given) ───────────────────────────────────────────────── */
+  --mp-colors-background-surface: #fafafa;
+}
+
+/* Info banner → light blue (#E8EFFD), not the periwinkle info background:
+ * a full-width periwinkle banner reads too dark behind body text. Only the
+ * banner surface changes — other info backgrounds keep #99B4DF. */
+html[data-product-theme="enterprise"] .mp-banner__root--variant_info {
+  background-color: var(--mp-colors-indigo-100, #e8effd);
+}

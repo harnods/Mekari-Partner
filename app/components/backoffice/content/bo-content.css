@@ -1,0 +1,71 @@
+/*
+ * Shared (scoped-imported) styles for the Backoffice config & content pages —
+ * Document Repository, Announcements, Roster, Configurations, Master Agreements.
+ * Every rule is a copy of the shipped index/form pattern (BillsIndexPage filter
+ * bar + empty state, NewCrmDealPage char counter, BoAgreementModal body) so the
+ * pages stay identical to the rest of the app. Import with
+ *   <style scoped src="./bo-content.css"></style>
+ */
+
+/* ── Filter bar (docs/patterns/ErpFilterBar.md) ── */
+.filter-left { display: flex; align-items: center; gap: var(--mp-spacing-4); flex-wrap: wrap; }
+.filter-right { display: flex; align-items: center; gap: var(--mp-spacing-3); margin-left: auto; }
+.filter-btn-group { display: flex; align-items: center; }
+.filter-btn-group :deep(.mp-pixel-button-group) { gap: var(--mp-spacing-2); }
+.search-clear-btn {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  min-width: 0 !important; padding: 0 !important; height: auto !important;
+  border: none !important; background: none !important; color: var(--mp-text-subtle);
+}
+
+/* ── Table cells ── */
+.cell-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; display: block; }
+.cell-stack { display: flex; flex-direction: column; min-width: 0; }
+.cell-sub { font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary); }
+.cell-muted { color: var(--mp-text-secondary); }
+.cell-badges { display: flex; flex-wrap: wrap; align-items: center; gap: var(--mp-spacing-2); }
+
+/* ── Empty state (rule/empty-state-structure — BillsIndexPage) ── */
+.empty-full { display: flex; flex-direction: column; align-items: center; }
+.empty-illustration { width: var(--empty-illo-w, 288px); height: var(--empty-illo-h, 240px); object-fit: contain; }
+.empty-full-title {
+  margin: 0;
+  font-size: var(--mp-font-sizes-lg); font-weight: var(--mp-font-weights-semi-bold);
+  color: var(--mp-text-default);
+}
+.empty-full-desc {
+  margin: var(--mp-spacing-0\.5) 0 0;
+  font-size: var(--mp-font-sizes-md); color: var(--mp-text-secondary);
+}
+.empty-full-btn { margin-top: var(--mp-spacing-3); }
+
+/* ── Page lead under the title bar ── */
+.bo-lead {
+  margin: 0;
+  max-width: 880px;
+  font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md);
+  color: var(--mp-text-secondary);
+}
+
+/* ── Modal / form body (BoAgreementModal) ── */
+.bc-body { display: flex; flex-direction: column; gap: var(--mp-spacing-5); }
+.bc-field { display: flex; flex-direction: column; gap: var(--mp-spacing-1); }
+.bc-label { font-size: var(--mp-font-sizes-md); font-weight: var(--mp-font-weights-semi-bold); line-height: var(--mp-line-heights-md); color: var(--mp-text-default); }
+.bc-caption { display: block; margin-top: var(--mp-spacing-1); font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary); }
+.bc-err { display: block; margin-top: var(--mp-spacing-1); font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-danger); }
+.bc-lead { margin: 0; font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md); color: var(--mp-text-secondary); }
+/* char-counter on the label row (rule/input-char-counter) */
+.bc-lbl-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--mp-spacing-2); }
+.bc-counter { font-size: var(--mp-font-sizes-sm); color: var(--mp-text-secondary); }
+/* checkbox list — MpCheckbox carries its own 12px gap (rule/checkbox-gap-12); multi-line → top (rule/checkbox-multiline-top) */
+.bc-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--mp-spacing-3); }
+.bc-checklist :deep(.mp-checkbox__root),
+.bc-checklist :deep(.mp-radio__root) { align-items: flex-start; }
+.bc-check-text { display: flex; flex-direction: column; }
+.bc-check-title { font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md); color: var(--mp-text-default); }
+.bc-check-desc { font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary); }
+
+/* ── Form page (docs/patterns/Form.md — 6-col, max 558px, stacked) ── */
+.bf-form { display: flex; flex-direction: column; gap: var(--mp-spacing-5); width: 100%; max-width: 558px; }
+.bf-section-title { margin: 0; font-size: var(--mp-font-sizes-lg); font-weight: var(--mp-font-weights-semi-bold); line-height: var(--mp-line-heights-lg); color: var(--mp-text-default); }
+.bf-footer { max-width: 558px; width: 100%; }

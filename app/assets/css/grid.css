@@ -1,0 +1,40 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Mekari Partner page grid  (rule/grid-12-col)
+
+   • 12 FLUID columns — each an equal fraction (minmax(0, 1fr)), so column width
+     is responsive, NOT a fixed pixel size.
+   • 12px gutter.
+   • The whole 12-grid caps at a total width of 1440px; on wider screens it stays
+     at 1440px (it doesn't keep growing).
+   • The column COUNT steps down 12 → 10 → 8 → 6 → 4 as the viewport narrows.
+   • Two layouts (pick one per surface):
+       .mp-grid--center → the 1440 grid sits CENTERED on screen (e.g. Home).
+       .mp-grid--left   → the 1440 grid is aligned to the LEFT (stage gutter),
+                          empty space falls to the right on very wide screens.
+
+   The grid lives inside the .stage, which supplies the 24px side padding — that
+   padding is the minimum side gutter until the 1440 max-width takes over.
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --mp-grid-max: 1440px;
+  --mp-grid-gutter: var(--mp-spacing-3, 12px);
+}
+
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--mp-grid-cols, 12), minmax(0, 1fr));
+  gap: var(--mp-grid-gutter);
+  width: 100%;
+  max-width: var(--mp-grid-max);
+}
+
+/* Layout 1 — centered on screen. */
+.mp-grid--center { margin-inline: auto; }
+/* Layout 2 — left-aligned (hug the left stage gutter). */
+.mp-grid--left { margin-left: 0; margin-right: auto; }
+
+/* Responsive column count: 12 → 10 → 8 → 6 → 4. */
+@media (max-width: 1199.98px) { .mp-grid { --mp-grid-cols: 10; } }
+@media (max-width: 991.98px)  { .mp-grid { --mp-grid-cols: 8; } }
+@media (max-width: 767.98px)  { .mp-grid { --mp-grid-cols: 6; } }
+@media (max-width: 575.98px)  { .mp-grid { --mp-grid-cols: 4; } }

@@ -8,6 +8,7 @@
  * the same session.
  */
 import { ref, computed } from 'vue'
+import { mockAccountProfile } from '~/data/authMock'
 
 export interface AuthUser {
   email: string
@@ -60,11 +61,32 @@ export function useAuth() {
    *  a display name from the email so the header shows who's "signed in". */
   function signInMock(email?: string, name?: string): void {
     const addr = (email || '').trim()
-    const local = addr.split('@')[0] || ''
+    // Drop a "+tag" (dirman+deleted@… → "Dirman") before deriving a name.
+    const local = (addr.split('@')[0] || '').split('+')[0] || ''
     const derived = local
       ? local.replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
       : 'Pengguna Mekari'
     user.value = { email: addr || 'demo@mekari.com', name: name?.trim() || derived, picture: '' }
+    // The stored sign-up profile belongs to ONE account per browser. If a
+    // different account signs in, load that account's record instead (a Mekari
+    // account always has every sign-up field — never blanks), so the header /
+    // account card never show someone else's data.
+    const prof = useProfile()
+    const record = mockAccountProfile(user.value.email, user.value.name)
+    const cur = prof.profile.value
+    if (cur.email.toLowerCase() !== user.value.email.toLowerCase()) {
+      prof.save(record)
+    } else {
+      // Same account but an incomplete stored record (e.g. saved by an older
+      // build) — fill only the blanks; never overwrite what the user gave.
+      const blanks = Object.fromEntries(
+        (Object.keys(record) as (keyof typeof record)[]).filter((k) => !cur[k]).map((k) => [k, record[k]]),
+      )
+      if (Object.keys(blanks).length) prof.save(blanks)
+    }
+    // Mock account directory decides the partner-org state for this account
+    // ("+deleted" → org removed). One place, so every sign-in path applies it.
+    usePartnerStatus().applyMockAccount(user.value.email)
     status.value = 'authed'
   }
 

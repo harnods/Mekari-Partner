@@ -56,6 +56,7 @@ is the point: they *feel* normal, which is exactly why they slip through.
 | Gray text on a secondary button | black/default text + bold border | `rule/btn-secondary-black` |
 | Secondary variant for a Cancel button | ghost | `rule/btn-cancel-ghost` |
 | `box-shadow` to lift a card | 1px border | `rule/surface-border-no-shadow` |
+| Ad-hoc column widths / gutters for page content | `.mp-grid`: 12 fluid cols, 12px gutter, 1440 max, count 12→4, center/left | `rule/grid-12-col` |
 | Italic for a note/caption/hint | smaller size + secondary color | `rule/type-no-italic` |
 | Regular-weight H1 / H2 / H3 heading | headings are always semibold | `rule/type-heading-semibold` |
 | Hardcoded `px` / hex color | `var(--mp-*)` tokens | `rule/token-no-hardcoded-*` |
@@ -782,6 +783,32 @@ ERP override wins.
 - **`rule/surface-no-double-pad`** — *Do:* a `pageRegistry` page must not add its own
   outer padding — `.stage` already gives 24px. **Why:** avoids doubled gutters.
   **Lint:** review.
+- **`rule/stage-padding-24`** — *Do:* the content **`.stage`** has **24px padding on
+  all four sides** (top / right / bottom / left — `--mp-spacing-6`). Page content sits
+  on that gutter; don't change it per page. The **`.mp-grid` lives inside the stage** (see
+  `rule/grid-12-col`): the 24px padding is the grid's minimum side gutter until its 1440
+  max-width takes over. A deliberately
+  **full-bleed** background (e.g. the Home mint hero gradient) is painted as the
+  **stage's own background** so it reaches the stage edges behind the padding — not with
+  negative margins on the content. **Why:** one consistent page gutter on every screen.
+  **Source:** `docs/patterns/pixel-enterprise-overrides.md`. **Lint:** review.
+- **`rule/grid-12-col`** — *Do:* lay out page content on the shared **`.mp-grid`**
+  (`app/assets/css/grid.css`), which lives **inside the `.stage`**: **12 FLUID columns**
+  (`minmax(0, 1fr)` — responsive width, **not** a fixed px), **12px gutter**, and the whole
+  grid **capped at 1440px total width** (wider screens keep it at 1440). The **column COUNT
+  steps down 12 → 10 → 8 → 6 → 4** as the viewport narrows, on breakpoints **1200 / 992 /
+  768 / 576** (`--mp-grid-cols`); content **spans** adjust at each step so e.g. the Home
+  greeting + card share the top row until ≤6 cols, where they stack full-width. Pick ONE of
+  two **layouts** per surface: **`.mp-grid--center`** — the 1440 grid centered on screen
+  (Home uses this) — or **`.mp-grid--left`** — the 1440 grid hugging the left stage gutter
+  (empty space falls to the right on very wide screens). The grid lives **only inside the
+  stage**; the header, sidebar, and page content outside the stage are not on it. *Don't:*
+  give columns a fixed px width, change the 12px gutter, exceed the 1440 cap, use a count
+  outside the 12/10/8/6/4 ladder, or hand-roll a per-page grid instead of `.mp-grid`.
+  **Why:** one fluid, capped grid with two documented alignments keeps every page aligned
+  and predictable across widths. Eyeball it with the overlay (**Shift+G**; press **L** to
+  flip center ↔ left) — its badge shows the live column count. **Source:**
+  `docs/patterns/pixel-enterprise-overrides.md`. **Lint:** review.
 
 ## Drawers — source: `docs/patterns/Drawer.md`
 

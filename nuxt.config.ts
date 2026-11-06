@@ -30,8 +30,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "Mekari ERP",
-      link: [{ rel: "icon", type: "image/svg+xml", href: "/mekari-brand.svg" }]
+      title: "Mekari Partner",
+      link: [{ rel: "icon", type: "image/png", href: "/favicon.png" }]
     }
   },
 
@@ -68,6 +68,11 @@ export default defineNuxtConfig({
     "@/assets/css/crm-page.css",
     // Shared shell for the Credit memo flow detail + form pages.
     "@/assets/css/credit-memo.css",
+    // Page grid system (rule/grid-12-col): .mp-grid + --center / --left layouts.
+    "@/assets/css/grid.css",
+    // Mekari Partner theme layer — overrides a few Enterprise brand colors.
+    // MUST load last so its overrides win over Pixel's enterprise tokens.
+    "@/assets/css/tokens/mekari-partner.css",
   ],
   postcss: {
     plugins: {

@@ -28,6 +28,403 @@ export interface DevChange {
 
 export const DEV_CHANGES: DevChange[] = [
   {
+    id: 'preg-tax-status',
+    title: 'Tax status in registration (Legal information)',
+    description:
+      'The partner registration form now collects Tax status (PKP / Non-PKP) in Step 1 — Legal information, for COMPANY partners only (an individual with a KTP is not asked). It is a required single choice, shown right under the Company NPWP number as a radio pair. The value flows through to the Step 4 review and the read-only registration preview drawer (Legal information section). Previously tax status was only set later by the Mekari team during backoffice validation; now the partner declares it up front.',
+    date: '2026-11-06',
+    files: ['pages/partner-registration/index.vue', 'data/partnerReg.ts', 'data/partnerRegReview.ts'],
+  },
+  {
+    id: 'home-content-indent',
+    title: 'Home content starts at grid column 3',
+    description:
+      'The Home main content (greeting, org/CTA, Announcements heading + list) is now indented to start at column 3 of the centered 12-col grid — a 2-column left margin — instead of column 1. Block widths (spans) are unchanged. Below 992px (grid ≤ 8 cols) the indent drops back to column 1 so the wide blocks still fit, and ≤768px they span the full row as before.',
+    date: '2026-11-06',
+    files: ['components/pages/HomePage.vue'],
+  },
+  {
+    id: 'preg-product-single',
+    title: 'Product is now a single choice',
+    description:
+      'Step 3 "Mekari product you want to sell and implement" is now a single-select (radio list), not a multi-select checklist — a partner picks exactly one product. The data model changed from products: string[] to product: string, and the choice is reflected everywhere it is read: the Step 4 review, the read-only registration preview drawer, and the "Under validation" org card on Home (its "Product" row shows the one chosen product).',
+    date: '2026-11-06',
+    files: ['pages/partner-registration/index.vue', 'data/partnerReg.ts', 'data/partnerRegReview.ts', 'components/pages/HomePage.vue'],
+  },
+  {
+    id: 'home-scenario-fab',
+    title: 'Home scenarios + switcher FAB',
+    description:
+      'Home now renders three states, switched from a round black FAB (settings icon) at the bottom-right — a demo control (useHomeScenario, persisted in localStorage; it does NOT change the real partner status). Scenarios: (1) "Org under validation" — the partner org card is shown (click → read-only registration preview); (2) "Org validated" — the DEFAULT — no org card, the page goes straight from the greeting to Announcements; (3) "No partner organization" — a short note + a primary "Create partner organization" button that opens the /partner-registration form. All three keep the vertical layout and the Announcements section.',
+    date: '2026-11-06',
+    files: ['components/HomeScenarioFab.vue', 'composables/useHomeScenario.ts', 'components/pages/HomePage.vue', 'data/translations.ts'],
+  },
+  // ── Backoffice: foundation ──
+  {
+    id: 'bo-sidebar',
+    title: 'Backoffice (internal portal) — sidebar + page shell',
+    description:
+      'New Mekari Partner internal portal under /backoffice/*. layouts/default.vue renders BackofficeSidebar (a copy of HrSidebar: level-1 rail + level-2 panel) for Home, Registrations, Partner Management, Partner Data Change, Document Repository, Announcements, Roster Management (Account Owners, Trainers) and Configurations (5 master lists + Master Agreements). Every backoffice page uses BoPage (same 72px title bar + 24px white stage as [...slug].vue, optional status tabs) and is login-protected by it. Data lives in app/data/backoffice.ts (seed + every business rule from the prototype, persisted with bo-* snapshots; Reset demo data restores the seed).',
+    date: '2026-11-06',
+    files: ['BackofficeSidebar.vue', 'backoffice/BoPage.vue', 'data/backoffice.ts', 'layouts/default.vue'],
+  },
+  {
+    id: 'bo-login',
+    title: 'Backoffice — internal portal login (H-01)',
+    description:
+      '/backoffice/login: Google SSO-style login restricted to @mekari.com accounts. A non-@mekari.com account shows an inline error card (never a toast); success signs in as Rina Wijaya and opens /backoffice/home. The scenario FAB (bottom-right) switches which Google account the mock SSO returns.',
+    date: '2026-11-06',
+    files: ['pages/backoffice/login.vue', 'data/backoffice.ts'],
+  },
+  {
+    id: 'bo-home',
+    title: 'Backoffice — dashboard (J-01)',
+    description:
+      '/backoffice/home: live counts from the backoffice store on the 12-col grid — registration tickets per stage + what needs attention (no Account Owner, Invalid checks, ready to complete), partners by status, change requests in review, document statuses, roster/master-agreement totals and the latest announcement. Each card links to its module.',
+    date: '2026-11-06',
+    files: ['pages/backoffice/home.vue', 'data/backoffice.ts'],
+  },
+  {
+    id: 'bo-agreement-section',
+    title: 'Backoffice — Agreements section (J-06 / K-07)',
+    description:
+      'Shared Partnership Agreement + Other agreements block for registration tickets and partners. Rows show name, method, derived status (PENDING / COMPLETED / EXPIRED) and expand to details; row menu follows the prototype rules (ticket: Edit / Remove in Agreement Drafting only; partner: PENDING → Edit / Delete, otherwise Edit remarks; + Duplicate). Delete/Remove confirm in a modal.',
+    date: '2026-11-06',
+    files: ['backoffice/BoAgreementSection.vue', 'data/backoffice.ts'],
+  },
+  {
+    id: 'bo-agreement-modal',
+    title: 'Backoffice — Agreement document modal',
+    description:
+      'Add / edit / edit-remarks / duplicate an agreement: method (By E-Sign or Manual), ACTIVE master agreement of the section type, Mekari Sign document (docs linked elsewhere are excluded), name, start/end dates, signed PDF via the shared dropzone (PDF-only), remarks. Errors are inline; Partnership Agreement date ranges on a partner cannot overlap; a COMPLETED duplicate expires the document it replaces.',
+    date: '2026-11-06',
+    files: ['backoffice/BoAgreementModal.vue', 'data/backoffice.ts'],
+  },
+  // ── Backoffice: registrations ──
+  {
+    id: 'bo-reg-ticket-sections',
+    title: "Backoffice — Registration drawer follows the partner registration form",
+    description:
+      "Ticket data sections now match the partner registration form's steps and copy: Legal information (Register as, Legal company name / Full name as on KTP, Company NPWP / NIK, file, Address as on NPWP / KTP, Tax status), Business profile (Business name, Partner code, Operating location, Website URL, LinkedIn URL, Company / Your industry) and Market and expertise (Product, Your specialization, Industries you want to sell to, Target company size, Average project value). Financial information (bank) is gone — the form no longer asks for it; Tax status moved into Legal information, so Data Validation has 4 checks (Legal, Identity, Business profile, Market and expertise). Phone number and Job position (from sign-up) join the summary facts.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegTicketDrawer.vue", "backoffice/registrations/regLogic.ts", "data/backoffice.ts"],
+  },
+  {
+    id: 'bo-reg-all-filters',
+    title: "Backoffice — Registrations: All filters drawer",
+    description:
+      "\"All filters\" button after the Source filter opens a drawer (ErpDrawer, draft → Apply): Submitted date (This week / This month / Last month / Last 3 months / Custom date range), Needs attention (the card badge blockers), Entity type, Tax status, and Is any of / Is none of tag filters for Province, Industry, Specialization, Target industry, Target company size and Average project value. The button shows the applied count. Stage captions moved to an info tooltip next to each column title; the five columns now fill the board width.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegFiltersDrawer.vue", "backoffice/registrations/regLogic.ts", "patterns/AdvancedDateRangePicker.vue"],
+  },
+  {
+    id: 'bo-reg-board',
+    title: "Backoffice — Registrations board (J-02)",
+    description:
+      "Five stage columns (Registration Request → Data Validation → Agreement Drafting → Completed / Rejected) with captions, counts and ticket cards (number, date, brand, code · entity · product, stage note, source, Account Owner). The whole card drags (4px threshold, a plain click still opens it): it lifts into a floating ghost, its own slot stays as a gray placeholder, and over a column it may enter a gray drop slot opens at the pointer while the cards below slide down. Swimlane colours never change; a blocked column shows its reason inline. The drop position is saved (ticket rank). Completed / Rejected cards are locked.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegBoard.vue", "backoffice/registrations/RegTicketCard.vue"],
+  },
+  {
+    id: 'bo-reg-filters',
+    title: "Backoffice — Registrations filter bar",
+    description:
+      "Account Owner (incl. \"No Account Owner\"), Product and Source filters + Export (ExportModal) + search pill (number, brand, legal name, partner code, submitter, email). Filtered-to-nothing shows its own empty state with Reset filters.",
+    date: '2026-11-06',
+    files: ["pages/backoffice/registrations.vue", "backoffice/registrations/regLogic.ts"],
+  },
+  {
+    id: 'bo-reg-drop-feedback',
+    title: "Backoffice — inline feedback for a blocked drop",
+    description:
+      "Dropping a card where the rules forbid it (no Account Owner, an Invalid check, more than one stage, missing Tax Status, agreement blockers, locked ticket) shows the reason in an inline banner above the board — never an error toast (rule/form-errors-inline). Valid drops move the ticket and toast; drops on Rejected / Completed open their modal.",
+    date: '2026-11-06',
+    files: ["pages/backoffice/registrations.vue"],
+  },
+  {
+    id: 'bo-reg-empty',
+    title: "Backoffice — Registrations empty state",
+    description:
+      "No registrations yet → illustration + caption + secondary \"View partners\" (rule/empty-state-structure). The scenario FAB switches Default / Empty state / Loading (solid 3-card skeleton per column).",
+    date: '2026-11-06',
+    files: ["pages/backoffice/registrations.vue"],
+  },
+  {
+    id: 'bo-reg-ticket',
+    title: "Backoffice — Registration ticket drawer (J-04 / J-06 / J-12)",
+    description:
+      "Card click or /backoffice/registrations?ticket=REG-0152 opens a 720px Teleport drawer: facts, provenance link → Activity log modal, Rejected / Completed banner (Open partner), Account Owner selector, Agreements (BoAgreementSection, editable in Agreement Drafting) and the four data sections. An unknown ticket id shows an inline \"not found\" banner.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegTicketDrawer.vue", "backoffice/registrations/regLogic.ts"],
+  },
+  {
+    id: 'bo-reg-checks',
+    title: "Backoffice — Data Validation checks",
+    description:
+      "In Data Validation every section gets a Section check (Valid / Invalid); Legal adds Identity status (NPWP: from Mekari Klikpajak, locked / KTP: manual) and Financial adds Tax Status (PKP / Non-PKP). Outside Data Validation the results show as badges.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegTicketDrawer.vue"],
+  },
+  {
+    id: 'bo-reg-ticket-footer',
+    title: "Backoffice — ticket stage actions",
+    description:
+      "Footer: hint + Back to {previous} (secondary) · Reject (danger) · Move to {next} (primary). Buttons are never disabled — a blocked move shows the reason inline in the footer and on the field it points at (Account Owner / Tax Status). An Invalid check leaves only Reject.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegTicketDrawer.vue"],
+  },
+  {
+    id: 'bo-reg-reject',
+    title: "Backoffice — Rejection reason modal (J-09)",
+    description:
+      "Reject from the drawer or by dropping on Rejected: required reason (inline error, button stays clickable), the ticket locks in Rejected and the reason is emailed to the submitter; partner code is released.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegRejectModal.vue"],
+  },
+  {
+    id: 'bo-reg-complete',
+    title: "Backoffice — Move to Completed modal (J-11)",
+    description:
+      "Confirms what completing does (new Registered partner, or the linked Unregistered partner switched to Registered; submitter becomes admin; Zoho acquisition ticket updated). Confirm runs completeTicket — the partner appears in Partner Management.",
+    date: '2026-11-06',
+    files: ["backoffice/registrations/RegCompleteModal.vue"],
+  },
+  // ── Backoffice: partners ──
+  {
+    id: 'bo-partner-list',
+    title: "Backoffice — Partner Management list (K-01)",
+    description:
+      "/backoffice/partners: every partner on ErpTablePage — alphabetical, quick filters Status + Account Owner, All filters drawer (entity type, province, industry, product focus, origin), search pill, Export modal, kebab (View details, Get registration form link, Activate / Deactivate with confirm), skeleton, empty + filtered-empty states, ScenarioFab. Partners cannot be deleted.",
+    date: '2026-11-06',
+    files: ["pages/backoffice/partners/index.vue", "backoffice/partners/partnersView.ts"],
+  },
+  {
+    id: 'bo-partner-create',
+    title: "Backoffice — Create partner (K-03 / K-04)",
+    description:
+      "/backoffice/partners/new: legal name, Account Owner, country → province → city cascade, website + LinkedIn URL, and a users repeater (every user is admin, remove with the minus icon). Typing an email offers existing users from the directory (K-04); users of another partner are listed but cannot be picked. Errors inline after Save; success creates an Unregistered partner, toasts, and opens its detail.",
+    date: '2026-11-06',
+    files: ["pages/backoffice/partners/new.vue", "data/backoffice.ts"],
+  },
+  {
+    id: 'bo-partner-detail',
+    title: "Backoffice — Partner detail (K-09)",
+    description:
+      "/backoffice/partners/:id: breadcrumb, status badge, Jump-to switcher, Actions (Get registration form link / Activate / Deactivate), banners for a registration in progress and a change request in review, key facts, provenance link → Activity log (creation + decided change requests), tabs Profile · Agreements (K-07, shared section) · Partner users (read-only). Unknown id shows a not-found state.",
+    date: '2026-11-06',
+    files: ["pages/backoffice/partners/[id].vue", "backoffice/partners/partnersView.ts"],
+  },
+  {
+    id: 'bo-partner-profile',
+    title: "Backoffice — Partner profile tab",
+    description:
+      "Editable: Account Owner, Technical PIC, Tax Status, partner industry, website / LinkedIn URL, can-implement toggle (updatePartnerProfile). Everything else is read-only ContentList. Discard changes + Save changes always clickable; invalid URL / missing Account Owner / nothing changed explain inline.",
+    date: '2026-11-06',
+    files: ["backoffice/partners/BoPartnerProfileTab.vue"],
+  },
+  {
+    id: 'bo-partner-link-modal',
+    title: "Backoffice — Registration form link (K-06)",
+    description:
+      "Modal with the pre-filled registration-form URL of an Unregistered partner and its query parameters; Copy link copies it and toasts. Offered only while no registration has been submitted through the link.",
+    date: '2026-11-06',
+    files: ["backoffice/partners/BoRegistrationLinkModal.vue"],
+  },
+  {
+    id: 'bo-pdc-list',
+    title: "Backoffice — Partner Data Change list (N-01)",
+    description:
+      "/backoffice/partner-data-change: change requests newest first with status tabs (In review count · Approved · Rejected · Cancelled · All), Partner quick filter, search, export, ScenarioFab. ?cr=CR-xxxx opens the request (used by the partner detail banner).",
+    date: '2026-11-06',
+    files: ["pages/backoffice/partner-data-change.vue"],
+  },
+  {
+    id: 'bo-pdc-drawer',
+    title: "Backoffice — Change request side panel",
+    description:
+      "Field · Current · Requested comparison with changed rows flagged. In review: Approve (confirm → values applied to the partner) or Reject (reason required, inline). Approved / Rejected / Cancelled are read-only with the decision banner.",
+    date: '2026-11-06',
+    files: ["backoffice/partners/BoChangeRequestDrawer.vue", "data/backoffice.ts"],
+  },
+  // ── Backoffice: config & content ──
+  {
+    id: 'bo-docs-list',
+    title: 'Backoffice — Document Repository (L-04)',
+    description:
+      'Every agreement document on partners and on Agreement Drafting tickets in one ErpTablePage: Status + Method quick filters, pill search, Export. Partner links to the partner / registration, the document name opens the document drawer, Replaced agreement opens the replaced document. Re-agreement batches from a deprecated master agreement land here as PENDING rows.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoDocumentsPage.vue', 'pages/backoffice/documents.vue'],
+  },
+  {
+    id: 'bo-docs-drawer',
+    title: 'Backoffice — Document detail drawer (L-05)',
+    description:
+      'Shared ErpDrawer with ContentList details (owner, Account Owner, method, master agreement, dates, replaced agreement, Mekari Sign / file) and inline remarks save. Ticket rows and PENDING partner rows can be edited (BoAgreementModal) or deleted (ConfirmModal); COMPLETED / EXPIRED rows allow remarks only; partner rows can be duplicated. Deep-linkable via ?doc=.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoDocumentDrawer.vue'],
+  },
+  {
+    id: 'bo-ann-list',
+    title: 'Backoffice — Announcements (O-01 / O-04)',
+    description:
+      'Announcements list, newest first, with search + Export and a kebab Edit / Delete (delete behind a danger confirm). + New announcement opens the editor.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoAnnouncementsPage.vue', 'pages/backoffice/announcements/index.vue'],
+  },
+  {
+    id: 'bo-ann-editor',
+    title: 'Backoffice — Announcement editor (O-02 / O-03)',
+    description:
+      'Form page (558px, stacked): Title (100), Short description (250), rich-text Content (bold / italic / underline / heading / lists toolbar). Errors inline on save; create posts straight away, edit keeps the original Posted at. Unknown id shows a not-found state.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoAnnouncementForm.vue', 'backoffice/content/BoRichText.vue', 'pages/backoffice/announcements/new.vue', 'pages/backoffice/announcements/[id].vue'],
+  },
+  {
+    id: 'bo-roster-list',
+    title: 'Backoffice — Partner Account Owners / Trainers (I-10 / I-11)',
+    description:
+      'Roster tables (alphabetical) with Product filter, search, Export and an assignments count. Add / edit in a modal (name 60, email, products via MpInputTag). Deleting someone still assigned to a partner or registration is blocked with an inline banner.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoRosterPage.vue', 'pages/backoffice/account-owners.vue', 'pages/backoffice/trainers.vue'],
+  },
+  {
+    id: 'bo-roster-modal',
+    title: 'Backoffice — Roster record modal (I-10)',
+    description:
+      'MpModal md: Name with counter, Email (unique per list), Products (MpInputTag suggestions from Configurations › Products). Errors inline; Save / Save changes.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoRosterModal.vue'],
+  },
+  {
+    id: 'bo-cfg-master',
+    title: 'Backoffice — Configurations master lists (I-02)',
+    description:
+      'One generic page for Professions, Specializations, Responsibilities, Partner Roles and Products: Usage filter (In use / Not in use), search, Export, Description and Responsibilities columns where relevant. Records in use can be edited but deleting them is blocked with an inline banner.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMasterPage.vue', 'pages/backoffice/configurations/[key].vue'],
+  },
+  {
+    id: 'bo-cfg-master-modal',
+    title: 'Backoffice — Master record modal',
+    description:
+      'Add / edit a master record: Name (60), Description (250) for responsibilities and roles, and a responsibilities checklist for Partner Roles.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMasterModal.vue'],
+  },
+  {
+    id: 'bo-cfg-ma-list',
+    title: 'Backoffice — Master Agreements list (I-07)',
+    description:
+      'Master agreements with Status + Type filters, products tags, file and status; kebab View details / Duplicate (as DRAFT).',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMaListPage.vue', 'pages/backoffice/configurations/master-agreements/index.vue'],
+  },
+  {
+    id: 'bo-cfg-ma-editor',
+    title: 'Backoffice — Master agreement editor (I-07)',
+    description:
+      'Form page: Name, Description, Type PRIMARY / OTHERS (fixed once saved), products × partner roles matrix for PRIMARY, one PDF via the shared dropzone. DEPRECATED master agreements are read-only.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMaForm.vue', 'pages/backoffice/configurations/master-agreements/new.vue', 'pages/backoffice/configurations/master-agreements/[id].vue'],
+  },
+  {
+    id: 'bo-cfg-ma-status',
+    title: 'Backoffice — Master agreement status (I-09)',
+    description:
+      'Status panel with the allowed transitions only: DRAFT → ACTIVE, ACTIVE → DRAFT while unused, ACTIVE → Deprecate. DEPRECATED is final.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMaForm.vue'],
+  },
+  {
+    id: 'bo-cfg-ma-deprecate',
+    title: 'Backoffice — Deprecate master agreement (L-02)',
+    description:
+      'Impact counts (partners, non-expired partner documents, Agreement Drafting tickets), an ACTIVE same-type replacement picker and a typed DEPRECATE confirm. Confirm runs the re-agreement batch: one PENDING document per non-expired partner document on the replacement, visible in Document Repository.',
+    date: '2026-11-06',
+    files: ['backoffice/content/BoMaDeprecateModal.vue'],
+  },
+  // ── end Backoffice ──
+  {
+    id: 'home-preview-registered',
+    title: 'Home preview shortcut — /home?registered',
+    description:
+      'Added a demo/review bypass: opening any page with ?registered in the URL (e.g. /home?registered) renders the app as if the viewer were a SUBMITTED partner — signed in or not. AuthGate skips both the anonymous→/sign-in redirect and the partner→/partner-registration gate, so Home opens directly instead of bouncing to the registration wizard. The flag is read straight from window.location.search and latched in sessionStorage (usePreviewMode) so it survives client-side navigation within the tab and beats the router\'s own timing; it clears when the tab closes and never mutates the real partner status. Home shows its "under validation" card with placeholder data (org "Your organization", "All products", today\'s date) when there is no real registration. The home-vs-/ sidebar is now hidden for /home too, so /home matches / (full-bleed, no sidebar).',
+    date: '2026-11-06',
+    files: ['composables/usePreviewMode.ts', 'components/AuthGate.vue', 'layouts/default.vue', 'components/pages/HomePage.vue'],
+  },
+  {
+    id: 'partner-home-greeting',
+    title: 'Partner Home — greeting + org validation card',
+    description:
+      'The Home page (/) is full-bleed (no left sidebar; the main-container frame now has a 2px navy border on all sides + 12px rounded corners), over the original mint hero gradient (#E1F6F0 → white). Content follows the Bootstrap 12-col grid: a time-of-day greeting ("Good morning/afternoon/evening" / "Selamat pagi/siang/sore/malam" by hour + locale) with the user\'s first name + short welcome on the left 8 columns (col-8). A user has exactly ONE partner org; while it is UNDER VALIDATION by the Mekari team a single status card (col-3) is shown — org name (registration brand), the products chosen at registration ("All products" when every one is picked), the registration date, an "Under validation" tableStatus badge, and a short review note; no avatar. Clicking the card opens a read-only preview drawer of the submitted registration (all 3 wizard sections via ContentList; no edit — it cannot be changed while under validation; the review builder is shared with the registration wizard in data/partnerRegReview.ts). Once the org is approved the card disappears (new "approved" partner status; partnerGate treats it like "submitted" so the app stays open). The browser tab title across the app is "Mekari Partner | <page>" and the favicon is the Mekari star PNG at /favicon.png.',
+    date: '2026-11-05',
+    files: ['pages/HomePage.vue', 'composables/usePartnerStatus.ts', 'data/partnerGate.ts', 'layouts/default.vue'],
+  },
+  {
+    id: 'partner-header',
+    title: 'Partner header (app-wide)',
+    description:
+      'The whole Mekari Partner app now uses one stripped-down partner header (PartnerHeader.vue) on EVERY page, replacing the full ERP header (ErpHeader). It is the dark navy app bar with the white Mekari Partner wordmark on the left; the product-switcher (channel) icon, the center search, and the quick-action icons are all removed. The right side shows only the user snapshot: a 1-letter avatar + the user name + the company name (both from the sign-up profile). Clicking it opens the account menu (Language + Sign out). Rendered once by layouts/default.vue for all routes (hidden only in report-fullscreen).',
+    date: '2026-11-05',
+    files: ['PartnerHeader.vue', 'layouts/default.vue', 'public/mekari-partner-wordmark.svg'],
+  },
+  {
+    id: 'partner-theme-overview',
+    title: 'Mekari Partner theme — design token layer',
+    description:
+      'Added a two-layer color token architecture. Layer 1 (base) is Pixel 3 Token v2.4 Enterprise, which Pixel injects as --mp-colors-* on <body> at runtime. Layer 2 (app/assets/css/tokens/mekari-partner.css) is the Mekari Partner theme — a thin layer loaded last that overrides a few colors: brand green #4EA67D (primary buttons), navy #0B257E (header bar + dark app surface), neutral gray #6D6E6E (secondary text + bold border), and the info/blue family (#99B4DF info bg, #E8EFFD light blue). The ERP short aliases (--mp-text-*, --mp-background-*, …) in layouts/default.vue were re-based to reference --mp-colors-* so one override recolors both Pixel components and ERP chrome. See the applied palette in context on /pixel → Overview → "Theme — Mekari Partner".',
+    date: '2026-11-05',
+    files: ['tokens/mekari-partner.css', 'layouts/default.vue', 'pages/pixel/theme.vue', 'pages/pixel.vue', 'nuxt.config.ts'],
+  },
+  {
+    id: 'base-page-template',
+    title: 'Base page template (shell)',
+    description:
+      'Added a self-contained base PAGE template showing the full ERP page anatomy: header → container → left sidebar → content (page title + stage). Lives at app/pages/base-page.vue (layout: false), reachable at /base-page, and linked from /pixel → Overview → "Theme — Mekari Partner". In the real app this shell comes from layouts/default.vue (ErpHeader + .main-container + ErpSidebar) + [...slug].vue (title bar + stage); a page only fills the stage. This file is a copyable reference of the whole structure, themed with the Mekari Partner tokens, with a <slot> stage.',
+    date: '2026-11-05',
+    files: ['pages/base-page.vue', 'pages/pixel/theme.vue'],
+  },
+  {
+    id: 'base-list-page-template',
+    title: 'Base list-page template',
+    description:
+      'Added a reusable starter template for new index/list pages: app/components/pages/BaseListPage.vue — the canonical skeleton (summary cards + filter bar + ErpTablePage/useTableState + row kebab + empty state) built from the sanctioned patterns (kind-based columns, ErpStatusBadge, ErpTagList, ErpFilterSelect, .filter-search pill), with placeholder data and copy via t(). Copy it to app/components/pages/<Name>Page.vue and register it in [...slug].vue › pageRegistry. It is registered as "Base template" and reachable at /base-template (full app chrome), and showcased inline on /pixel → Overview → "Theme — Mekari Partner".',
+    date: '2026-11-05',
+    files: ['pages/BaseListPage.vue', 'pages/[...slug].vue', 'pages/pixel/theme.vue', 'data/translations.ts'],
+  },
+  {
+    id: 'partner-org-chooser',
+    title: 'No partner organization — chooser on sign-in',
+    description:
+      'New partner status "removed": the partner organization was deleted (from the Mekari backoffice — no delete action in this app) but the Mekari account still exists. On every sign-in such a user lands on /partner-organization: "You don’t have a partner organization" with two choices joined in one group (single bold outer border, divider between) — "Register a new partner organization" (starts the registration form from the start; the old draft is cleared, sign-up data still prefills) and "Go to Home" (opens the app for this browser session — survives a reload, cleared on sign-out; what Home shows without an org is still to be decided, so it is fully open for now). Users who never had an org still go straight to the registration form. Routing rules live in data/partnerGate.ts (unit-tested); the logo + user menu bar is now a shared PartnerTopBar component. To demo: sign in with any address that has "+deleted" before the @ (e.g. dirman+deleted@gmail.com) — it counts as a registered Mekari account whose org was deleted (password + any OTP). Signing in with any other address clears that state. When a different account signs in, the stored profile is replaced with that account’s complete Mekari account record (name, email, phone, company, job position, role — never blanks, since every sign-up field is required), so the header and the “Your account” card never show another account’s data or empty fields.',
+    date: '2026-11-05',
+    files: ['partner-organization.vue', 'PartnerTopBar.vue', 'partnerGate.ts', 'usePartnerStatus.ts', 'AuthGate.vue', 'partner-registration/index.vue', 'translations.ts'],
+  },
+  {
+    id: 'preg-done-icon',
+    title: 'Partner registration — success icon',
+    description:
+      'The "Registration submitted" screen used an icon name that does not exist in the Pixel icon library ("checkmark-circle"), so a fallback glyph rendered. It now uses the library icon "done", fill variant, 48px, success color. The partner code "available" indicator had the same problem ("checkmark") and now uses "done" (fill) too.',
+    date: '2026-11-05',
+    files: ['partner-registration/index.vue'],
+  },
+  {
+    id: 'preg-form-v2',
+    title: 'Partner registration — restructured form',
+    description:
+      'The registration is reorganised around what a partner is (sells AND implements Mekari products) and no longer re-asks sign-up data. Steps: 1 Legal information — "Register as" Individual (independent consultant) or Company (consulting firm / agency / SI) at the top; Individual asks full name as on KTP, NIK (16 digits), KTP file and address as on KTP; Company asks legal company name, company NPWP (16 digits), NPWP file and address as on NPWP. Address is structured (country › province › city + street). Full name as on KTP defaults to the full name from sign-up (legal company name defaults to the sign-up company) — on type selection and when a resumed draft has a type but no name; an edited name is never overwritten. Switching type resets the legal fields. 2 Business profile — Business name (replaces "Brand"; required for Company, optional for Individual), Partner code (MP + up to 8 chars, suggested from the business name), operating location ("Same as the address on KTP/NPWP", on by default), website, LinkedIn, industry. 3 Market and expertise (full stage width, each question a segment with an edge-to-edge divider) — products to sell and implement, specialization, target industries (max 3), target company size (max 2, now required), average project value. 4 Review and submit — summary per step with Edit, plus terms agreement. Removed: phone (from sign-up), "Can implement" checkbox (implied), bank account (collected at onboarding after approval). Sign-up data (name, email, phone, company, job position, role) shows read-only under the steps. Fields stack at the 558px form width; selects and upload are half width (rule/form-field-stacking, rule/form-select-half); upload uses MpUpload; the uploaded file row shows the file size (not "Uploaded") and has no download button — only remove. Text fields (inputs and the address textarea) have no placeholder text; select and upload prompts stay. Province lists all 38 Indonesian provinces (searchable), each with its cities.',
+    date: '2026-11-05',
+    files: ['partner-registration/index.vue', 'partnerReg.ts', 'usePartnerStatus.ts', 'translations.ts'],
+  },
+  {
+    id: 'preg-user-menu',
+    title: 'Partner registration — user menu (Language + Sign out)',
+    description:
+      'Top-right of the Partner registration page: a user button (MpAvatar lg / 36px circle + the full name entered at sign-up, 14px regular). It opens a popover modelled on the ERP header user menu (ErpUserMenu): "Language › <current>" opens a Change language sub-view (back button, check on the active language), and "Sign out" ends the session and returns to Sign in (the registration draft is kept). The separate language select in the top bar is removed — language now lives only in this menu. The "Resumed from your saved draft" banner was also removed. On narrow screens only the avatar shows.',
+    date: '2026-11-05',
+    files: ['partner-registration/index.vue'],
+  },
+  {
     id: 'crm-invite-edit-disabled-options',
     title: 'Invite / Edit user: options disabled up front, with the reason',
     description:
@@ -1031,6 +1428,38 @@ export const DEV_CHANGES: DevChange[] = [
       'Entering a registered email and pressing Continue now reveals the password field right under the email on the same /sign-in page (two-stage inline form) instead of routing to a separate page. The email stays editable (not disabled) in the password stage, and editing it keeps the password field in place — the form does NOT collapse back to the email/Google step. Only the explicit "Use a different email" returns to the email step. The "Sign in with Google" button and the "or" divider stay visible the whole time (revealing the password never changes the rest of the form); the primary button switches from Continue to Sign in. Unregistered emails still route to Complete your profile. The standalone /sign-in/password route is retired (redirects to /sign-in). The email required-field error was also simplified to "You must fill in email" (dropped the "… in format: name@example.com" tail) on sign-in, sign-up and forgot-password.',
     date: '2026-11-03',
     files: ['sign-in/index.vue', 'sign-in/password.vue', 'translations.ts'],
+  },
+  {
+    id: 'partner-registration-polish',
+    title: 'Partner registration — required *, code check, toast, density',
+    description:
+      'Refinements: every required field now shows a red * (MpFormControl is-required); optional fields (website, LinkedIn, segment, ID type) have none. Partner-code availability shows a green checkmark inside the field when available (green "is available" text removed) and only surfaces a caption error when the code is taken (mock reserved list). "Save as draft" no longer signs you out/redirects — it saves and shows a "Draft saved" toast, staying on the form (MpToastManager added to the blank layout). Step 2 checkbox groups lost their bordered boxes and row dividers for a compact two-column list (fewer lines). Step 3 Country defaults to Indonesia.',
+    date: '2026-11-03',
+    files: ['partner-registration/index.vue', 'partnerReg.ts', 'blank.vue', 'translations.ts'],
+  },
+  {
+    id: 'partner-registration-ia',
+    title: 'Partner registration — step restructure + multi product + auto-fill',
+    description:
+      'IA fix after audit. Step 1 (Company information) now leads with Entity type → Brand name → Partner code → Phone → Industry → Website/LinkedIn (no Product field up top). Product moved to Step 2 (Market profile) and is now MULTI-select (Products you want to sell — pick Talenta, Jurnal, etc.), alongside the "Can implement" capability, specialization, target industry, segment and deal size. No fields removed: Brand name and Phone now auto-fill from the Complete-profile step (new useProfile store persists the sign-up data), still editable.',
+    date: '2026-11-03',
+    files: ['partner-registration/index.vue', 'partnerReg.ts', 'useProfile.ts', 'sign-up.vue', 'translations.ts'],
+  },
+  {
+    id: 'partner-registration-copy',
+    title: 'Partner registration — clearer copy',
+    description:
+      'Copy audit pass on the registration form (EN + ID). Partner-code helper simplified to "Letters and numbers only, up to 8 characters after MP. This code cannot be changed later."; "Existing average deal value range" → "Average deal size" with a plain-language helper; "Set by entity type" → "Choose entity type first"; "Does not need to match the legal name on the ID." → "Can differ from the legal name on your ID."; dropdown placeholders made field-specific (Select industry/province/city/bank/product); product, brand, legal, file and success copy tightened.',
+    date: '2026-11-03',
+    files: ['partner-registration/index.vue'],
+  },
+  {
+    id: 'partner-registration',
+    title: 'Partner registration wizard (4 steps) + gating',
+    description:
+      'After Complete your profile, Continue now goes to a 4-step Partner registration wizard (standalone page): Company information, Market profile, Legal profile, Financial information, then a submission-success screen. A signed-in user is NOT a partner until they submit — the AuthGate blocks the ERP (Home and every other page) and bounces them to /partner-registration; every sign-in returns them there. Entries autosave as a draft and "Save as draft" saves + signs out, so the next sign-in resumes with the draft prefilled (info banner). Submitting marks them a partner and unlocks Home. Note: the reference design said entries are not saved until submit — the draft/resume behaviour is an intentional deviation requested by the user.',
+    date: '2026-11-03',
+    files: ['partner-registration/index.vue', 'usePartnerStatus.ts', 'partnerReg.ts', 'AuthGate.vue', 'sign-up.vue'],
   },
   {
     id: 'auth-actions-gap',

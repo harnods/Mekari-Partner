@@ -136,6 +136,21 @@ const statusConfig: Record<string, StatusConfig> = {
   beta:       { type: 'information',  label: 'Beta'       },
   vip:        { type: 'information',  label: 'VIP'        },
   featured:   { type: 'information',  label: 'Featured'   },
+
+  // ── Backoffice (Mekari Partner internal portal — app/data/backoffice.ts) ──
+  // Registration ticket stages: intake gray → validation yellow → drafting blue
+  // (in progress) → Completed green / Rejected red (existing keys).
+  'registration request': { type: 'announcement', label: 'Registration Request' },
+  'data validation':      { type: 'warning',      label: 'Data Validation' },
+  'agreement drafting':   { type: 'information',  label: 'Agreement Drafting' },
+  // Master agreement: DRAFT / ACTIVE (existing) + DEPRECATED (final → gray).
+  deprecated:   { type: 'announcement', label: 'Deprecated'   },
+  // Partner status: Unregistered gray, Registered blue, Active/Inactive existing.
+  unregistered: { type: 'announcement', label: 'Unregistered' },
+  registered:   { type: 'information',  label: 'Registered'   },
+  // Data-validation section checks.
+  valid:        { type: 'completed',    label: 'Valid'        },
+  invalid:      { type: 'critical',     label: 'Invalid'      },
 }
 
 const config = computed<StatusConfig>(() => {

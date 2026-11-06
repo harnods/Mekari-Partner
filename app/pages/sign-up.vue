@@ -121,6 +121,7 @@ const { t } = useLocale()
 const router = useRouter()
 const { signInMock } = useAuth()
 const flow = useAuthFlow()
+const { save: saveProfile } = useProfile()
 
 const fullName = ref('')
 const email = ref(flow.email)
@@ -164,8 +165,20 @@ function onSave() {
   err.phone = phone.value.replace(/\D/g, '').length < 6
   if (err.name || err.email || err.company || err.job || err.role || err.roleOther || err.phone) return
   flow.unregistered = false
+  // Carry what we just collected into the partner registration (auto-fill).
+  saveProfile({
+    fullName: fullName.value.trim(),
+    email: email.value.trim(),
+    company: company.value.trim(),
+    jobPosition: jobPosition.value.trim(),
+    role: role.value === 'other' ? roleOther.value.trim() : role.value,
+    phone: phone.value.trim(),
+    phoneIso2: country.value.iso2.toLowerCase(),
+  })
   signInMock(email.value, fullName.value.trim())
-  router.push('/')
+  // A fresh account is never a partner yet → straight to the partner
+  // registration (the gate would send them there anyway).
+  router.push('/partner-registration')
 }
 
 useHead({ title: () => `Mekari Partner | ${t('Complete your profile')}` })

@@ -53,7 +53,7 @@ const props = withDefaults(defineProps<{
 })
 const emit = defineEmits<{ 'update:modelValue': [Date[]] }>()
 
-type Mode = 'today' | 'last7' | 'last14' | 'last30' | 'next7' | 'next14' | 'next30' | 'day' | 'week' | 'month' | 'year' | 'custom' | 'thisMonth' | 'thisQuarter' | 'thisYear' | 'thisWeek' | 'nextMonth'
+type Mode = 'today' | 'last7' | 'last14' | 'last30' | 'next7' | 'next14' | 'next30' | 'day' | 'week' | 'month' | 'year' | 'custom' | 'thisMonth' | 'thisQuarter' | 'thisYear' | 'thisWeek' | 'nextMonth' | 'lastMonth' | 'last3Months'
 
 const open = ref(false)
 const mode = ref<Mode>(props.direction === 'future' ? 'next30' : 'last30')
@@ -94,6 +94,9 @@ function presetBounds(key: Mode): [Date, Date] {
     case 'thisWeek':    return [startOfWeek(today), endOfWeek(today)]
     case 'thisMonth':   return [startOfMonth(today), endOfMonth(today)]
     case 'nextMonth': { const n = new Date(today.getFullYear(), today.getMonth() + 1, 1); return [startOfMonth(n), endOfMonth(n)] }
+    case 'lastMonth': { const n = new Date(today.getFullYear(), today.getMonth() - 1, 1); return [startOfMonth(n), endOfMonth(n)] }
+    // Rolling 3 months up to today (e.g. 7 Aug – 6 Nov).
+    case 'last3Months': return [addDays(new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()), 1), today]
     case 'thisQuarter': return [startOfQuarter(today), endOfQuarter(today)]
     case 'thisYear':    return [new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31)]
     default:       return [today, today]
@@ -141,6 +144,8 @@ const labelText = computed(() => {
     case 'custom': return 'Custom'
     case 'thisWeek': return 'This week'
     case 'nextMonth': return 'Next month'
+    case 'lastMonth': return 'Last month'
+    case 'last3Months': return 'Last 3 months'
     case 'thisMonth': return 'This month'
     case 'thisQuarter': return 'This quarter'
     case 'thisYear': return 'This year'

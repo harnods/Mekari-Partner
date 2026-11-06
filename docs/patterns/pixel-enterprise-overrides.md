@@ -180,6 +180,54 @@ keeps it. Kebabs built with `<MpButton left-icon="menu-kebab">` are unaffected a
 are the preferred form for new code. See `rule/table-row-kebab-icon`; guarded by
 `tests/pixel-police.spec.ts`.
 
+## 11. Stage padding & the 12-column grid
+
+Two linked layout rules — `rule/stage-padding-24` and `rule/grid-12-col`.
+
+- **Stage padding = 24px, all four sides.** The content **`.stage`** (the white/neutral
+  area inside the `.main-container` frame, below the page title bar) carries **24px**
+  padding on **top, right, bottom and left** (`--mp-spacing-6`). A `pageRegistry` page
+  renders *into* that stage and must **not** add its own outer padding
+  (`rule/surface-no-double-pad`) — doing so doubles the gutter.
+
+- **Bootstrap 6 grid, followed exactly.** Page content uses the **Bootstrap grid**:
+
+  - **12 columns at every breakpoint.** The grid never collapses to fewer columns; a
+    "3-up on mobile" layout is a **column span** (`col-4` / `.g-col-4` → 12 ÷ 4 = 3 across),
+    not a change in column count.
+  - **24px gutter** (1.5rem — Bootstrap's default `--bs-gutter-x`) between columns.
+  - **Centered `.container` with responsive max-widths:** sm **540** · md **720** ·
+    lg **960** · xl **1140** · xxl **1320** (full-width below sm). Content sits in the
+    container; on wide screens it is centered with margins at the sides.
+  - **Bootstrap breakpoints:** sm **576** · md **768** · lg **992** · xl **1200** ·
+    xxl **1400** px.
+
+  Refs (follow exactly): breakpoints, containers, grid, columns, gutters, css-grid —
+  <https://getbootstrap.com/docs/6.0/layout/grid/>. The grid is the unit of horizontal
+  rhythm for everything a page puts in the stage (cards, form sections, tiles, detail
+  columns). It applies **only inside the stage** — the global header, the left sidebar,
+  and any deliberately full-bleed band are **not** on this grid.
+
+  ```
+  ┌─ .main-container (navy frame) ─────────────────────────────┐
+  │  header / sidebar live OUTSIDE the grid                     │
+  │  ┌─ .stage · 24px padding all sides ──────────────────────┐ │
+  │  │  [1][2][3][4][5][6][7][8][9][10][11][12]  ← 12 cols     │ │
+  │  │   └─ 24px gutter between columns ─┘                     │ │
+  │  └────────────────────────────────────────────────────────┘ │
+  └────────────────────────────────────────────────────────────┘
+  ```
+
+- **Full-bleed is the explicit exception.** A surface that must reach the stage edges
+  (e.g. the Home hero gradient) escapes the 24px stage padding with **negative margins**
+  (`margin: 0 calc(-1 * var(--mp-spacing-6))`) and leaves a comment saying so. It is a
+  named exception, not a new default.
+
+- **Checking against the grid.** Toggle a live 12-col overlay with **Shift+G** (or
+  `window.__mpGrid.show()` from the console) — `app/components/GridOverlay.vue` +
+  `useGridOverlay`. It draws the 12 columns + 24px gutters inside the stage so a layout
+  can be eyeballed against the grid; it's dev-only and off by default.
+
 ## Rule of thumb
 
 Reach for the **ERP class/component** (`btn-enterprise--*`, `.filter-search`,

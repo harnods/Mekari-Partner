@@ -18,24 +18,39 @@
 <script setup lang="ts">
 import { onMounted, watch, computed } from 'vue'
 import { MpSpinner } from '@mekari/pixel3'
+import { isAuthPath, partnerGateTarget } from '~/data/partnerGate'
+import { usePreviewMode } from '~/composables/usePreviewMode'
 
 const { status, refresh } = useAuth()
+const ps = usePartnerStatus()
+const { registered: previewRegistered } = usePreviewMode()
 const route = useRoute()
 const router = useRouter()
-
-const AUTH_ROUTES = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password']
-const isAuthPath = (p: string) => AUTH_ROUTES.some((a) => p === a || p.startsWith(a + '/'))
 
 onMounted(() => refresh())
 
 watch(
-  [status, () => route.path],
-  ([s, p]) => {
-    // Only bounce an anonymous session onto the auth flow. We deliberately do
-    // NOT redirect an authed user away from /sign-in — the gate is off in this
-    // prototype (every load resolves to authed), so bouncing would make the
-    // sign-in page impossible to open directly. Leave /sign-in reachable.
-    if (s === 'anonymous' && !isAuthPath(p)) router.replace('/sign-in')
+  [status, ps.status, ps.homeChosen, previewRegistered, () => route.fullPath],
+  ([s, partner, homeChosen, preview, _p]) => {
+    // Preview bypass (?registered): don't gate — render whatever the URL points at
+    // (e.g. /home?registered) as if the viewer were a submitted partner.
+    if (preview) return
+    const p = route.path
+    // Internal portal: its own session guard (BoPage → /backoffice/login), never the partner gate.
+    if (p === '/backoffice' || p.startsWith('/backoffice/')) return
+    // Anonymous → onto the auth flow (but /sign-in itself stays reachable; see note).
+    if (s === 'anonymous') {
+      ps.clearSession()
+      if (!isAuthPath(p)) router.replace('/sign-in')
+      return
+    }
+    // Signed in: route by partner-organization status (data/partnerGate.ts) —
+    // never had one → registration; org removed → the chooser on every sign-in;
+    // partner → the whole app.
+    if (s === 'authed') {
+      const target = partnerGateTarget(partner, p, homeChosen)
+      if (target) router.replace(target)
+    }
   },
   { immediate: true },
 )
