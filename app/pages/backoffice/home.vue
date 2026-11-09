@@ -1,12 +1,8 @@
 <template>
   <!-- J-01 Internal portal dashboard. Counts are live from app/data/backoffice.ts. -->
   <BoPage :title="t('Home')">
-    <template #actions>
-      <span v-if="bo.session" class="bo-home-signed">{{ t('Signed in as') }} {{ bo.session.email }}</span>
-      <MpButton variant="ghost" is-rounded @click="onLogout">{{ t('Log out') }}</MpButton>
-    </template>
 
-    <div class="bo-grid" data-devchange="bo-home">
+    <div class="bo-grid" data-devchange="bo-home-full-bleed">
       <!-- Registrations pipeline -->
       <section class="bo-card bo-card--full">
         <header class="bo-card__head">
@@ -126,7 +122,7 @@ import { computed } from 'vue'
 import { MpButton } from '@mekari/pixel3'
 import BoPage from '~/components/backoffice/BoPage.vue'
 import ErpStatusBadge from '~/components/patterns/ErpStatusBadge.vue'
-import { bo, boLogout, dashboardCounts, BO_STAGES, BO_STAGE_CAPTION, type BoPartnerStatus } from '~/data/backoffice'
+import { dashboardCounts, BO_STAGES, BO_STAGE_CAPTION, type BoPartnerStatus } from '~/data/backoffice'
 import { formatDateTimeLong } from '~/utils/date'
 
 const { t } = useLocale()
@@ -140,26 +136,18 @@ const attention = computed(() => [
   { n: c.value.readyToComplete, label: t('Agreement Drafting tickets ready to complete') },
 ])
 
-function onLogout() {
-  boLogout()
-  router.push('/backoffice/login')
-}
-
 useHead({ title: () => `Mekari Partner | ${t('Internal portal')}` })
 </script>
 
 <style scoped>
-.bo-home-signed { font-size: var(--mp-font-sizes-sm); color: var(--mp-text-secondary); white-space: nowrap; }
-@media (max-width: 767.98px) { .bo-home-signed { display: none; } }
-
-/* 12-col grid (rule/grid-12-col): 80px-max columns, 12px gutter, left-aligned;
-   the count steps 12 → 10 → 8 → 6 → 4 (mirrors HomePage). */
+/* Full-bleed 12-col grid (rule/grid-12-col): fluid columns fill the whole stage
+   (no 1440 cap on Home), 12px gutter; count steps 12 → 10 → 8 → 6 → 4. */
 .bo-grid {
   --bo-cols: 12;
   display: grid;
-  grid-template-columns: repeat(var(--bo-cols), minmax(0, 80px));
-  gap: var(--mp-spacing-3, 12px);
-  justify-content: start;
+  grid-template-columns: repeat(var(--bo-cols), minmax(0, 1fr));
+  column-gap: var(--mp-spacing-6, 24px);
+  row-gap: var(--mp-spacing-8, 32px);
 }
 .bo-card--full { grid-column: 1 / -1; }
 .bo-card--half { grid-column: span 6; }
@@ -168,16 +156,12 @@ useHead({ title: () => `Mekari Partner | ${t('Internal portal')}` })
 @media (max-width: 767.98px) { .bo-grid { --bo-cols: 6; } .bo-card--half { grid-column: 1 / -1; } }
 @media (max-width: 575.98px) { .bo-grid { --bo-cols: 4; } }
 
-/* Cards — 1px border, no shadow (rule/surface-border-no-shadow) */
+/* Sections sit straight on the stage — no card box inside the stage. */
 .bo-card {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--mp-spacing-4);
-  padding: var(--mp-spacing-5);
-  background: var(--mp-background-stage, #ffffff);
-  border: 1px solid var(--mp-border-default, #e3e7e9);
-  border-radius: var(--mp-radii-lg, 12px);
 }
 .bo-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--mp-spacing-3); }
 .bo-card__title { margin: 0; font-size: var(--mp-font-sizes-lg); line-height: var(--mp-line-heights-lg); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-default); }

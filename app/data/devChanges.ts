@@ -28,6 +28,22 @@ export interface DevChange {
 
 export const DEV_CHANGES: DevChange[] = [
   {
+    id: 'bo-header-session',
+    title: 'Backoffice — account moved to the header bar',
+    description:
+      '"Signed in as" and Log out are gone from the Home title bar. On every /backoffice page the header shows the internal user (name + email), and its Sign out ends the portal session and returns to /backoffice/login.',
+    date: '2026-11-09',
+    files: ['PartnerHeader.vue', 'pages/backoffice/home.vue'],
+  },
+  {
+    id: 'bo-home-full-bleed',
+    title: 'Backoffice — Home is full-bleed, sections unboxed',
+    description:
+      'The internal portal Home now spans the full stage width (fluid 12-column grid instead of 80px-max columns), and its sections (Registrations, Partners, Partner Data Change, Document Repository, Roster, Latest announcement) sit directly on the stage without a bordered card around each.',
+    date: '2026-11-09',
+    files: ['pages/backoffice/home.vue'],
+  },
+  {
     id: 'bo-reg-lane-skeleton',
     title: 'Backoffice — Registrations loading skeleton matches its lane',
     description:

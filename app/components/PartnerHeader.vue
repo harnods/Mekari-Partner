@@ -17,7 +17,7 @@
     <div class="phh__right">
       <MpPopover id="phh-user-menu" placement="bottom-end" trigger="click" use-portal v-slot="{ onClosePopover }" @close="onMenuClose">
         <MpPopoverTrigger>
-          <div class="phh__user" role="button" tabindex="0" :aria-label="t('User menu')" data-devchange="partner-header">
+          <div class="phh__user" role="button" tabindex="0" :aria-label="t('User menu')" :data-devchange="isBackoffice ? 'bo-header-session' : 'partner-header'">
             <MpAvatar id="phh-user-avatar" :name="userInitial" size="md" variant-color="sky" />
             <span class="phh__user-text">
               <span class="phh__user-name">{{ userName }}</span>
@@ -59,16 +59,23 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { MpPopover, MpPopoverTrigger, MpPopoverContent, MpAvatar, MpButton, MpIcon } from '@mekari/pixel3'
+import { bo, boLogout } from '~/data/backoffice'
 
 const { t, locale, setLocale } = useLocale()
 const router = useRouter()
+const route = useRoute()
+// Backoffice (internal portal) has its own session: the header shows the
+// internal user and signs out of the portal (→ /backoffice/login).
+const isBackoffice = computed(() => route.path.startsWith('/backoffice'))
 const auth = useAuth()
 const { profile } = useProfile()
 
 // Name + company come from the sign-up profile (Complete-your-profile), falling
 // back to the signed-in session for the name.
-const userName = computed(() => profile.value.fullName || auth.user.value?.name || auth.user.value?.email || 'Pengguna Mekari')
-const companyName = computed(() => profile.value.company || '')
+const userName = computed(() => isBackoffice.value
+  ? (bo.session?.name || bo.session?.email || t('Internal portal'))
+  : (profile.value.fullName || auth.user.value?.name || auth.user.value?.email || 'Pengguna Mekari'))
+const companyName = computed(() => isBackoffice.value ? (bo.session?.email || '') : (profile.value.company || ''))
 // 1-letter initial only (not first+last) — pass a single char so MpAvatar renders one letter.
 const userInitial = computed(() => (userName.value.trim().charAt(0) || 'M').toUpperCase())
 
@@ -84,6 +91,11 @@ function onMenuClose() { setTimeout(() => { menuView.value = 'main' }, 300) }
 
 async function onSignOut(close: () => void) {
   close()
+  if (isBackoffice.value) {
+    boLogout()
+    router.replace('/backoffice/login')
+    return
+  }
   await auth.signOut()
   router.replace('/sign-in')
 }
