@@ -28,6 +28,22 @@ export interface DevChange {
 
 export const DEV_CHANGES: DevChange[] = [
   {
+    id: 'bo-home-partner-kpi',
+    title: 'Backoffice — Home Partners counts use plain captions',
+    description:
+      'The Partners counts on Home (Unregistered, Registered, Active, Inactive) now show the status as a plain secondary caption under the number, like Document Repository, instead of a status badge.',
+    date: '2026-11-09',
+    files: ['pages/backoffice/home.vue'],
+  },
+  {
+    id: 'bo-home-quad',
+    title: 'Backoffice — Home summary in one 2×2 box',
+    description:
+      'Partners, Partner Data Change, Document Repository and Roster and configurations now sit in a single bordered box split into a 2×2 grid with divider lines and no gaps (stacks to one column on mobile).',
+    date: '2026-11-09',
+    files: ['pages/backoffice/home.vue'],
+  },
+  {
     id: 'bo-header-session',
     title: 'Backoffice — account moved to the header bar',
     description:

@@ -24,76 +24,79 @@
         </ul>
       </section>
 
-      <!-- Partners by status -->
-      <section class="bo-card bo-card--half">
-        <header class="bo-card__head">
-          <h2 class="bo-card__title">{{ t('Partners') }}</h2>
-          <NuxtLink class="bo-link" to="/backoffice/partners">{{ t('View partners') }}</NuxtLink>
-        </header>
-        <div class="bo-kpis">
-          <div v-for="s in partnerStatuses" :key="s" class="bo-kpi">
-            <span class="bo-stat">{{ c.partnersByStatus[s] }}</span>
-            <ErpStatusBadge :status="s" :label="t(s)" />
+      <!-- Partners · Data change · Documents · Roster — one box, 2×2, no gaps -->
+      <div class="bo-quad" data-devchange="bo-home-quad">
+        <!-- Partners by status -->
+        <section class="bo-card bo-quad__cell">
+          <header class="bo-card__head">
+            <h2 class="bo-card__title">{{ t('Partners') }}</h2>
+            <NuxtLink class="bo-link" to="/backoffice/partners">{{ t('View partners') }}</NuxtLink>
+          </header>
+          <div class="bo-kpis">
+            <div v-for="s in partnerStatuses" :key="s" class="bo-kpi" data-devchange="bo-home-partner-kpi">
+              <span class="bo-stat">{{ c.partnersByStatus[s] }}</span>
+              <span class="bo-caption">{{ t(s) }}</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Partner data change -->
-      <section class="bo-card bo-card--half">
-        <header class="bo-card__head">
-          <h2 class="bo-card__title">{{ t('Partner Data Change') }}</h2>
-          <NuxtLink class="bo-link" to="/backoffice/partner-data-change">{{ t('View requests') }}</NuxtLink>
-        </header>
-        <div class="bo-kpis">
-          <div class="bo-kpi">
-            <span class="bo-stat">{{ c.crInReview }}</span>
-            <span class="bo-caption">{{ t('Requests in review') }}</span>
+        <!-- Partner data change -->
+        <section class="bo-card bo-quad__cell">
+          <header class="bo-card__head">
+            <h2 class="bo-card__title">{{ t('Partner Data Change') }}</h2>
+            <NuxtLink class="bo-link" to="/backoffice/partner-data-change">{{ t('View requests') }}</NuxtLink>
+          </header>
+          <div class="bo-kpis">
+            <div class="bo-kpi">
+              <span class="bo-stat">{{ c.crInReview }}</span>
+              <span class="bo-caption">{{ t('Requests in review') }}</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Document repository -->
-      <section class="bo-card bo-card--half">
-        <header class="bo-card__head">
-          <h2 class="bo-card__title">{{ t('Document Repository') }}</h2>
-          <NuxtLink class="bo-link" to="/backoffice/documents">{{ t('View documents') }}</NuxtLink>
-        </header>
-        <div class="bo-kpis">
-          <div class="bo-kpi">
-            <span class="bo-stat">{{ c.docsPending }}</span>
-            <span class="bo-caption">{{ t('Pending documents') }}</span>
+        <!-- Document repository -->
+        <section class="bo-card bo-quad__cell">
+          <header class="bo-card__head">
+            <h2 class="bo-card__title">{{ t('Document Repository') }}</h2>
+            <NuxtLink class="bo-link" to="/backoffice/documents">{{ t('View documents') }}</NuxtLink>
+          </header>
+          <div class="bo-kpis">
+            <div class="bo-kpi">
+              <span class="bo-stat">{{ c.docsPending }}</span>
+              <span class="bo-caption">{{ t('Pending documents') }}</span>
+            </div>
+            <div class="bo-kpi">
+              <span class="bo-stat">{{ c.docsExpiringSoon }}</span>
+              <span class="bo-caption">{{ t('Ending in 30 days') }}</span>
+            </div>
+            <div class="bo-kpi">
+              <span class="bo-stat">{{ c.docsExpired }}</span>
+              <span class="bo-caption">{{ t('Expired documents') }}</span>
+            </div>
           </div>
-          <div class="bo-kpi">
-            <span class="bo-stat">{{ c.docsExpiringSoon }}</span>
-            <span class="bo-caption">{{ t('Ending in 30 days') }}</span>
-          </div>
-          <div class="bo-kpi">
-            <span class="bo-stat">{{ c.docsExpired }}</span>
-            <span class="bo-caption">{{ t('Expired documents') }}</span>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Roster + configurations -->
-      <section class="bo-card bo-card--half">
-        <header class="bo-card__head">
-          <h2 class="bo-card__title">{{ t('Roster and configurations') }}</h2>
-        </header>
-        <div class="bo-kpis">
-          <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/account-owners">
-            <span class="bo-stat">{{ c.accountOwners }}</span>
-            <span class="bo-caption">{{ t('Partner Account Owners') }}</span>
-          </NuxtLink>
-          <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/trainers">
-            <span class="bo-stat">{{ c.trainers }}</span>
-            <span class="bo-caption">{{ t('Trainers') }}</span>
-          </NuxtLink>
-          <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/configurations/master-agreements">
-            <span class="bo-stat">{{ c.activeMas }}</span>
-            <span class="bo-caption">{{ t('Active master agreements') }}</span>
-          </NuxtLink>
-        </div>
-      </section>
+        <!-- Roster + configurations -->
+        <section class="bo-card bo-quad__cell">
+          <header class="bo-card__head">
+            <h2 class="bo-card__title">{{ t('Roster and configurations') }}</h2>
+          </header>
+          <div class="bo-kpis">
+            <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/account-owners">
+              <span class="bo-stat">{{ c.accountOwners }}</span>
+              <span class="bo-caption">{{ t('Partner Account Owners') }}</span>
+            </NuxtLink>
+            <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/trainers">
+              <span class="bo-stat">{{ c.trainers }}</span>
+              <span class="bo-caption">{{ t('Trainers') }}</span>
+            </NuxtLink>
+            <NuxtLink class="bo-kpi bo-kpi--link" to="/backoffice/configurations/master-agreements">
+              <span class="bo-stat">{{ c.activeMas }}</span>
+              <span class="bo-caption">{{ t('Active master agreements') }}</span>
+            </NuxtLink>
+          </div>
+        </section>
+      </div>
 
       <!-- Latest announcement -->
       <section class="bo-card bo-card--full">
@@ -150,11 +153,29 @@ useHead({ title: () => `Mekari Partner | ${t('Internal portal')}` })
   row-gap: var(--mp-spacing-8, 32px);
 }
 .bo-card--full { grid-column: 1 / -1; }
-.bo-card--half { grid-column: span 6; }
-@media (max-width: 1199.98px) { .bo-grid { --bo-cols: 10; } .bo-card--half { grid-column: span 5; } }
-@media (max-width: 991.98px) { .bo-grid { --bo-cols: 8; } .bo-card--half { grid-column: span 4; } }
-@media (max-width: 767.98px) { .bo-grid { --bo-cols: 6; } .bo-card--half { grid-column: 1 / -1; } }
+@media (max-width: 1199.98px) { .bo-grid { --bo-cols: 10; } }
+@media (max-width: 991.98px) { .bo-grid { --bo-cols: 8; } }
+@media (max-width: 767.98px) { .bo-grid { --bo-cols: 6; } }
 @media (max-width: 575.98px) { .bo-grid { --bo-cols: 4; } }
+
+/* Partners / Partner Data Change / Document Repository / Roster: one bordered
+   box split 2×2 with hairline dividers, no gaps (rule/surface-border-no-shadow). */
+.bo-quad {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--mp-border-default, #e3e7e9);
+  border-radius: var(--mp-radii-lg, 12px);
+  overflow: hidden;
+}
+.bo-quad__cell { padding: var(--mp-spacing-5, 20px); }
+.bo-quad__cell:nth-child(odd) { border-right: 1px solid var(--mp-border-default, #e3e7e9); }
+.bo-quad__cell:nth-child(n+3) { border-top: 1px solid var(--mp-border-default, #e3e7e9); }
+@media (max-width: 767.98px) {
+  .bo-quad { grid-template-columns: minmax(0, 1fr); }
+  .bo-quad__cell:nth-child(odd) { border-right: 0; }
+  .bo-quad__cell:nth-child(n+2) { border-top: 1px solid var(--mp-border-default, #e3e7e9); }
+}
 
 /* Sections sit straight on the stage — no card box inside the stage. */
 .bo-card {

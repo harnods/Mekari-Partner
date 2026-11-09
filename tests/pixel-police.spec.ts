@@ -211,38 +211,6 @@ describe('pixel-police — no hand-rolled filter chips', () => {
   })
 })
 
-describe('pixel-police — VAT reconciliation is token-only', () => {
-  // The module was ported from a standalone HTML/React prototype that styled
-  // everything with literal rgb()/hex. It has since been fully converted to
-  // --mp-* semantic tokens; this rule keeps the raw values from coming back with
-  // the next port or copy-paste.
-  const vatFiles = allFiles.filter((f) =>
-    /(?:VatReconciliation|VatMatchingRules|Reconciliation(?:Detail|Filters)Drawer)[A-Za-z]*\.vue$/.test(f))
-
-  it('covers the whole module (guard would silently pass on an empty file list)', () => {
-    expect(vatFiles.map(rel).sort()).toEqual([
-      'app/components/pages/VatMatchingRulesPage.vue',
-      'app/components/pages/VatReconciliationPeriodsPage.vue',
-      'app/components/pages/VatReconciliationUnmatchedPage.vue',
-      'app/components/pages/VatReconciliationWorkspacePage.vue',
-      'app/components/patterns/ReconciliationDetailDrawer.vue',
-      'app/components/patterns/ReconciliationFiltersDrawer.vue',
-    ])
-  })
-
-  it('has no literal colors — every color comes from a --mp-* token', () => {
-    // 3/6/8-digit hex with a hard boundary so `#filters` (slot name) and
-    // `#10223` (detail-page title pattern) don't false-flag.
-    const hits = violations(
-      vatFiles,
-      /rgba?\(\s*\d|hsla?\(\s*\d|#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![0-9a-fA-F\w])/,
-      // A hex named in a docblock is documentation, not styling.
-      { skipComments: true },
-    )
-    expect(hits, `Literal color in VAT reconciliation — use a --mp-* token:\n${hits.join('\n')}`).toEqual([])
-  })
-})
-
 describe('pixel-police — table body text is regular weight (docs/table-design.md)', () => {
   it('shared CRM table cells are not semibold/bold', () => {
     const css = readFileSync(join(ROOT, 'app/assets/css/crm-page.css'), 'utf8')

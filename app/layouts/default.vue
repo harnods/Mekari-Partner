@@ -1,44 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { MpToastManager } from '@mekari/pixel3'
-import { useProductMenu } from '~/composables/useProductMenu'
-import { useReportFullscreen } from '~/composables/useReportFullscreen'
-import { isHrPath } from '~/utils/hrRoutes'
 // DevChangesOverlay disabled — coachmarks were distracting during dev.
 // import DevChangesOverlay from '~/components/patterns/DevChangesOverlay.vue'
 
-// The module nav follows the active product: Talenta (HR) on /hr* + the HR module
-// pages (Employee directory, etc.), Qontak (CRM) on /crm*, ERP otherwise.
+// Backoffice (Mekari Partner internal portal) owns its own sidebar. Partner Home
+// (/) and the other catch-all routes are full-bleed: no left sidebar.
 const route = useRoute()
-const isHr = computed(() => isHrPath(route.path))
-const isCrm = computed(() => route.path.startsWith('/crm'))
-// Backoffice (Mekari Partner internal portal) owns its own sidebar.
 const isBackoffice = computed(() => route.path.startsWith('/backoffice'))
-// No CRM access → the /crm route shows the paywall full-bleed, with NO level-1
-// sidebar at all (not even the ERP one). See useCrmAccess + CrmPaywallPage.
-const { hasCrmAccess } = useCrmAccess()
-const crmPaywall = computed(() => isCrm.value && !hasCrmAccess.value)
-// The product-switcher rail is opt-in (top-right user menu → "Show ERP Menu").
-const { showProductMenu } = useProductMenu()
-// A report page can request a chrome-less full-screen view (header + nav hidden).
-const { isReportFullscreen } = useReportFullscreen()
-// Home (/) is full-bleed: no left sidebar, the stage spans the whole container.
-const isHome = computed(() => route.path === '/' || route.path === '/home')
 // Dev 12-col grid overlay (toggle with Shift+G, or window.__mpGrid.show()).
 const { visible: gridVisible } = useGridOverlay()
 </script>
 
 <template>
   <div class="app-shell">
-    <PartnerHeader v-if="!isReportFullscreen" />
-    <div class="main-container" :class="{ 'main-container--rail': showProductMenu && !isReportFullscreen, 'main-container--fullscreen': isReportFullscreen }">
-      <template v-if="!isReportFullscreen && !isHome">
-        <ErpNavbarGroup v-if="showProductMenu" />
-        <BackofficeSidebar v-if="isBackoffice" />
-        <HrSidebar v-else-if="isHr" />
-        <CrmSidebar v-else-if="isCrm && !crmPaywall" />
-        <ErpSidebar v-else-if="!crmPaywall" />
-      </template>
+    <PartnerHeader />
+    <div class="main-container">
+      <BackofficeSidebar v-if="isBackoffice" />
       <div class="content-area">
         <slot />
         <GridOverlay v-if="gridVisible" />
