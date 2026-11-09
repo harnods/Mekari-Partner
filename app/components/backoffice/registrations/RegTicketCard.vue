@@ -28,7 +28,7 @@ const sub = computed(() => [props.ticket.code, t(props.ticket.entity), props.tic
         <MpIcon name="drag" size="sm" />
       </span>
       <span class="rtc-id">{{ ticket.id }}</span>
-      <span class="rtc-date">{{ formatDateLong(ticket.date) }}</span>
+      <span class="rtc-date" data-devchange="bo-reg-card-type">{{ formatDateLong(ticket.date) }}</span>
     </div>
     <span class="rtc-brand">{{ ticket.brand }}</span>
     <span class="rtc-sub">{{ sub }}</span>
@@ -53,7 +53,7 @@ const sub = computed(() => [props.ticket.code, t(props.ticket.entity), props.tic
 }
 .rtc-top { display: flex; align-items: center; gap: var(--mp-spacing-2); font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary); }
 .rtc-id { flex: 1; min-width: 0; }
-.rtc-date { flex-shrink: 0; }
+.rtc-date { flex-shrink: 0; color: var(--mp-text-default); }
 .rtc-drag {
   display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
   margin-left: calc(-1 * var(--mp-spacing-1)); color: var(--mp-icon-subtle, #97a0af);
@@ -66,7 +66,7 @@ const sub = computed(() => [props.ticket.code, t(props.ticket.entity), props.tic
   padding-top: var(--mp-spacing-2); border-top: 1px solid var(--mp-border-default, #e3e7e9);
   font-size: var(--mp-font-sizes-sm); line-height: var(--mp-line-heights-sm); color: var(--mp-text-secondary);
 }
-.rtc-strong { font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-default); }
+.rtc-strong { font-weight: var(--mp-font-weights-regular); color: var(--mp-text-default); }
 .rtc-ae { overflow-wrap: anywhere; }
 /* Floating drag ghost — transient lift, the documented exception to
    rule/surface-border-no-shadow (rule/dnd-live-sortable §2). */

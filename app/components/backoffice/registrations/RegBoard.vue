@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
  * RegBoard — the J-02 registration kanban: five stage columns (name, info
- * tooltip with the stage caption, count) with ticket cards. Mirrors the CRM Deals board look (full-width neutral
- * swimlanes, white 8px cards) and moves cards with a pointer-based sortable
+ * tooltip with the stage caption, count) with ticket cards. Mirrors the CRM Deals board look (full-width
+ * swimlanes, white 8px cards); each swimlane has its own pastel tint from a
+ * semantic Pixel background token (see STAGE_TONE) and moves cards with a pointer-based sortable
  * drag (no native HTML5 DnD):
  *   • press anywhere on an unlocked card and move 4px → the card lifts into a
  *     floating ghost that follows the cursor; its own slot stays behind as a
@@ -21,6 +22,15 @@ import { MpIcon, MpTooltip } from '@mekari/pixel3'
 import RegTicketCard from './RegTicketCard.vue'
 import { BO_STAGE_CAPTION, getTicket, type BoTicket, type TicketStage } from '~/data/backoffice'
 import { dropFeedback, isLocked } from './regLogic'
+
+/** Pastel swimlane tint per stage — semantic Pixel tokens, so dark mode follows. */
+const STAGE_TONE: Record<TicketStage, string> = {
+  'Registration Request': 'info',
+  'Data Validation': 'highlight',
+  'Agreement Drafting': 'warning',
+  Completed: 'success',
+  Rejected: 'danger',
+}
 
 export interface RegColumn { stage: TicketStage; tickets: BoTicket[] }
 type Item = { kind: 'card'; tk: BoTicket } | { kind: 'slot' }
@@ -203,6 +213,8 @@ function onClick(id: string) {
       :key="col.stage"
       :ref="(el) => setColEl(col.stage, el)"
       class="rb-col"
+      :class="`rb-col--${STAGE_TONE[col.stage]}`"
+      data-devchange="bo-reg-lane-colors"
       :aria-label="t(col.stage)"
     >
       <header class="rb-col-head">
@@ -220,7 +232,7 @@ function onClick(id: string) {
 
       <div class="rb-col-body">
         <template v-if="loading">
-          <div v-for="n in 3" :key="n" class="rb-skeleton" />
+          <div v-for="n in 3" :key="n" class="rb-skeleton" data-devchange="bo-reg-lane-skeleton" />
         </template>
         <template v-else>
           <TransitionGroup name="rb-card" tag="div" class="rb-cards">
@@ -267,9 +279,17 @@ function onClick(id: string) {
 .rb-col {
   flex: 1 1 0; min-width: 200px; display: flex; flex-direction: column; min-height: 0;
   background: var(--mp-background-neutral-subtle, #f4f5f7);
-  border: 1px solid var(--mp-border-default, #e3e7e9);
   border-radius: 12px;
 }
+/* Pastel swimlane per stage (white cards sit on top, no lane border).
+   Exact swatches picked by design; no Pixel token is this soft. Loading
+   skeletons use the same lane tint, a touch darker (see .rb-skeleton). */
+.rb-col[class*='rb-col--'] { background: var(--rb-lane); }
+.rb-col--info { --rb-lane: var(--rb-lane-request, #f1f1f1); }
+.rb-col--highlight { --rb-lane: var(--rb-lane-validation, #f9f4f0); }
+.rb-col--warning { --rb-lane: var(--rb-lane-agreement, #eff4fa); }
+.rb-col--success { --rb-lane: var(--rb-lane-completed, #f0f4f1); }
+.rb-col--danger { --rb-lane: var(--rb-lane-rejected, #f9eeee); }
 .rb-col-head { display: flex; flex-direction: column; gap: 2px; padding: var(--mp-spacing-3) var(--mp-spacing-3) var(--mp-spacing-2); }
 .rb-col-title-row { display: flex; align-items: center; gap: var(--mp-spacing-1); }
 .rb-col-title { font-size: var(--mp-font-sizes-md); line-height: var(--mp-line-heights-md); font-weight: var(--mp-font-weights-semi-bold); color: var(--mp-text-default); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -291,6 +311,7 @@ function onClick(id: string) {
 .rb-col-empty { margin: 0; padding: var(--mp-spacing-4) 0; text-align: center; font-size: var(--mp-font-sizes-sm); color: var(--mp-text-secondary); }
 /* rule/skeleton-solid-static + rule/skeleton-3-rows */
 .rb-skeleton { height: 112px; border-radius: 8px; background-color: var(--mp-border-default, #e3e7e9); }
+.rb-col[class*='rb-col--'] .rb-skeleton { background-color: color-mix(in srgb, var(--rb-lane) 95%, var(--mp-text-default)); }
 
 .rb-ghost { position: fixed; left: 0; top: 0; z-index: 3000; pointer-events: none; will-change: transform; }
 .rb-ghost.is-settling { transition: transform 180ms cubic-bezier(0.2, 0, 0, 1); }

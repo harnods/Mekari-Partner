@@ -28,6 +28,30 @@ export interface DevChange {
 
 export const DEV_CHANGES: DevChange[] = [
   {
+    id: 'bo-reg-lane-skeleton',
+    title: 'Backoffice — Registrations loading skeleton matches its lane',
+    description:
+      'While the board loads, each swimlane\'s skeleton cards use that lane\'s pastel colour made slightly darker, instead of one gray for every lane.',
+    date: '2026-11-09',
+    files: ['backoffice/registrations/RegBoard.vue'],
+  },
+  {
+    id: 'bo-reg-card-type',
+    title: 'Backoffice — Registration card: date and source text',
+    description:
+      'On each registration card the submitted date now uses the default text colour (not secondary), and the Source value (e.g. Landing page) is regular weight instead of semibold.',
+    date: '2026-11-09',
+    files: ['backoffice/registrations/RegTicketCard.vue'],
+  },
+  {
+    id: 'bo-reg-lane-colors',
+    title: 'Backoffice — Registrations swimlanes get pastel colours',
+    description:
+      'Each stage column now has its own soft pastel background and no border: Registration Request (gray), Data Validation (warm beige), Agreement Drafting (blue), Completed (green), Rejected (pink). Cards stay white.',
+    date: '2026-11-09',
+    files: ['backoffice/registrations/RegBoard.vue'],
+  },
+  {
     id: 'preg-tax-status',
     title: 'Tax status in registration (Legal information)',
     description:
